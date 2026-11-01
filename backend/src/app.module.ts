@@ -6,6 +6,7 @@ import configuration from './config/configuration';
 import { validateEnv } from './config/env.validation';
 import { DatabaseModule } from './database/database.module';
 import { CommonModule } from './common/common.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
     imports: [
@@ -13,6 +14,7 @@ import { CommonModule } from './common/common.module';
         ThrottlerModule.forRoot([{ ttl: 60_000, limit: 120 }]), // límite general por IP
         DatabaseModule,
         CommonModule,
+        AuthModule,
     ],
     providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
