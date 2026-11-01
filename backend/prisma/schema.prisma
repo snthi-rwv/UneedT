@@ -1,0 +1,216 @@
+// Esquema de base de datos de UneedT (PostgreSQL)
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  DONE
+}
+
+enum TaskSource {
+  MANUAL
+  EMAIL
+}
+
+enum ProposalStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum SurveyKind {
+  BASELINE
+  FOLLOWUP
+}
+
+enum AccountStatus {
+  ACTIVE
+  REVOKED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String? // null si el usuario solo entra con Google
+  googleId     String?  @unique
+  createdAt    DateTime @default(now())
+
+  subjects      Subject[]
+  tasks         Task[]
+  refreshTokens RefreshToken[]
+  emailAccount  EmailAccount?
+  syncLogs      EmailSyncLog[]
+  proposals     TaskProposal[]
+  processed     ProcessedEmail[]
+  plans         StudyPlan[]
+  surveys       Survey[]
+}
+
+// Refresh tokens de UneedT. Se guarda solo el hash (SHA-256), nunca el token.
+model RefreshToken {
+  id        String    @id // = claim "jti" del JWT
+  userId    String
+  tokenHash String
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Subject {
+  id           String   @id @default(cuid())
+  userId       String
+  name         String
+  difficulty   Int      @default(3) // 1 (fácil) a 5 (muy difícil)
+  currentGrade Float? // escala colombiana 0.0 - 5.0
+  color        String   @default("#14213D")
+  createdAt    DateTime @default(now())
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks Task[]
+
+  @@unique([userId, name])
+}
+
+model Task {
+  id             String     @id @default(cuid())
+  userId         String
+  subjectId      String?
+  title          String
+  description    String?
+  dueDate        DateTime
+  weightPct      Float      @default(10) // % de la nota final
+  complexity     Int        @default(3) // 1 a 5
+  estimatedHours Float      @default(2)
+  hoursSpent     Float      @default(0)
+  status         TaskStatus @default(PENDING)
+  source         TaskSource @default(MANUAL)
+  priorityScore  Float      @default(0)
+  priorityReason String     @default("")
+  critical       Boolean    @default(false)
+  completedAt    DateTime?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject Subject?     @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  blocks  StudyBlock[]
+
+  @@index([userId, status, priorityScore])
+  @@index([userId, dueDate])
+}
+
+// Cuenta de Gmail conectada (OAuth solo lectura). El refresh token va cifrado (AES-256-GCM).
+model EmailAccount {
+  id              String        @id @default(cuid())
+  userId          String        @unique
+  email           String
+  refreshTokenEnc String
+  status          AccountStatus @default(ACTIVE)
+  lastSyncAt      DateTime?
+  createdAt       DateTime      @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model EmailSyncLog {
+  id         String    @id @default(cuid())
+  userId     String
+  startedAt  DateTime  @default(now())
+  finishedAt DateTime?
+  ok         Boolean   @default(false)
+  fetched    Int       @default(0)
+  proposed   Int       @default(0)
+  error      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, startedAt])
+}
+
+// Correos ya leídos, para no volver a procesarlos
+model ProcessedEmail {
+  userId    String
+  messageId String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, messageId])
+}
+
+// Panel de confirmación humana: la IA propone, el estudiante decide
+model TaskProposal {
+  id             String         @id @default(cuid())
+  userId         String
+  messageId      String
+  fromAddress    String
+  emailSubject   String
+  snippet        String
+  subjectHint    String?
+  title          String
+  description    String?
+  dueDate        DateTime?
+  weightPct      Float?
+  complexity     Int?
+  estimatedHours Float?
+  confidence     Float
+  status         ProposalStatus @default(PENDING)
+  createdAt      DateTime       @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, messageId, title])
+  @@index([userId, status])
+}
+
+model StudyPlan {
+  id             String   @id @default(cuid())
+  userId         String
+  date           String // AAAA-MM-DD
+  availableHours Float
+  createdAt      DateTime @default(now())
+
+  user   User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  blocks StudyBlock[]
+
+  @@unique([userId, date])
+}
+
+model StudyBlock {
+  id        String  @id @default(cuid())
+  planId    String
+  taskId    String
+  order     Int
+  startTime String // HH:mm
+  minutes   Int
+  note      String  @default("")
+  done      Boolean @default(false)
+
+  plan StudyPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  task Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+}
+
+// Indicador de Fin: puntuación de agobio académico (1-5)
+model Survey {
+  id        String     @id @default(cuid())
+  userId    String
+  score     Int
+  kind      SurveyKind
+  createdAt DateTime   @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
