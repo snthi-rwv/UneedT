@@ -10,6 +10,8 @@ import { AuthModule } from './modules/auth/auth.module';
 import { PriorityModule } from './modules/priority/priority.module';
 import { SubjectsModule } from './modules/subjects/subjects.module';
 import { TasksModule } from './modules/tasks/tasks.module';
+import { StudyPlanModule } from './modules/study-plan/study-plan.module';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
     imports: [
@@ -21,6 +23,8 @@ import { TasksModule } from './modules/tasks/tasks.module';
         PriorityModule,
         SubjectsModule,
         TasksModule,
+        StudyPlanModule,
+        HealthModule,
     ],
     providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })

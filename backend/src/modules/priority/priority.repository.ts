@@ -8,7 +8,17 @@ export interface ScoreUpdate { id: string; priorityScore: number; priorityReason
 export class PriorityRepository {
     constructor(private readonly prisma: PrismaService) {}
 
-    openTasks(userId: string) { return this.prisma.task.findMany({ where: { userId, status: { not: 'DONE' } }, include: { subject: true } }); }
+    openTasks(userId: string) {
+        return this.prisma.task.findMany({ where: { userId, status: { not: 'DONE' } }, include: { subject: true } });
+    }
+    topOpenTasks(userId: string, take: number) {
+        return this.prisma.task.findMany({
+            where: { userId, status: { not: 'DONE' } },
+            include: { subject: true },
+            orderBy: { priorityScore: 'desc' },
+            take,
+        });
+    }
     saveScores(updates: ScoreUpdate[]) {
         return this.prisma.$transaction(updates.map(({ id, ...data }) => this.prisma.task.update({ where: { id }, data })));
     }

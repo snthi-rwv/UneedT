@@ -57,6 +57,8 @@ export class TasksService {
         return { ok: true };
     }
 
+    prioritizeWithAi(userId: string) { return this.priority.refineWithAi(userId); }
+
     private async mustOwnSubject(userId: string, subjectId: string) {
         if (!(await this.subjects.findOwned(userId, subjectId))) throw new BadRequestException('La materia no existe');
     }
