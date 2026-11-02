@@ -1,29 +1,35 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import configuration from './config/configuration';
 import { validateEnv } from './config/env.validation';
 import { DatabaseModule } from './database/database.module';
 import { CommonModule } from './common/common.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { OAuthModule } from './modules/oauth/oauth.module';
 import { PriorityModule } from './modules/priority/priority.module';
 import { SubjectsModule } from './modules/subjects/subjects.module';
 import { TasksModule } from './modules/tasks/tasks.module';
 import { StudyPlanModule } from './modules/study-plan/study-plan.module';
+import { EmailSyncModule } from './modules/email-sync/email-sync.module';
 import { HealthModule } from './modules/health/health.module';
 
 @Module({
     imports: [
         ConfigModule.forRoot({ isGlobal: true, load: [configuration], validate: validateEnv }),
+        ScheduleModule.forRoot(), // necesario para el cron de sincronización
         ThrottlerModule.forRoot([{ ttl: 60_000, limit: 120 }]), // límite general por IP
         DatabaseModule,
         CommonModule,
         AuthModule,
+        OAuthModule,
         PriorityModule,
         SubjectsModule,
         TasksModule,
         StudyPlanModule,
+        EmailSyncModule,
         HealthModule,
     ],
     providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
