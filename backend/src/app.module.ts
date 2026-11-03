@@ -14,6 +14,8 @@ import { SubjectsModule } from './modules/subjects/subjects.module';
 import { TasksModule } from './modules/tasks/tasks.module';
 import { StudyPlanModule } from './modules/study-plan/study-plan.module';
 import { EmailSyncModule } from './modules/email-sync/email-sync.module';
+import { SurveysModule } from './modules/surveys/surveys.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { HealthModule } from './modules/health/health.module';
 
 @Module({
@@ -30,6 +32,8 @@ import { HealthModule } from './modules/health/health.module';
         TasksModule,
         StudyPlanModule,
         EmailSyncModule,
+        SurveysModule,
+        AnalyticsModule,
         HealthModule,
     ],
     providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
