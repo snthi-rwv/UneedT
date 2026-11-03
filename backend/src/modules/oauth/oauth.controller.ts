@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, Logger, Query, Res, UseGuards } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -7,6 +7,7 @@ import { OAuthService } from './oauth.service';
 
 @Controller('oauth/google')
 export class OAuthController {
+    private readonly log = new Logger(OAuthController.name);
     constructor(private readonly oauth: OAuthService, private readonly cfg: ConfigService) {}
 
     // 1) Inicio de sesión: redirige directo a Google
@@ -20,13 +21,18 @@ export class OAuthController {
     @Get('callback')
     async callback(@Query('code') code: string, @Query('state') state: string, @Query('error') error: string, @Res() res: Response) {
         const front = this.cfg.get<string>('frontendUrl');
-        if (error || !code || !state) return res.redirect(`${front}/?oauth_error=${encodeURIComponent(error || 'cancelado')}`);
+        if (error || !code || !state) {
+            this.log.warn(`Google volvió sin código. error=${error ?? '(ninguno)'}`);
+            return res.redirect(`${front}/?oauth_error=${encodeURIComponent(error || 'cancelado')}`);
+        }
         try {
             const r = await this.oauth.handleCallback(code, state);
             if (r.kind === 'gmail') return res.redirect(`${front}/correo?connected=1`);
             // Los tokens van en el fragmento (#), que el navegador no envía a ningún servidor
             return res.redirect(`${front}/auth/callback#access=${r.accessToken}&refresh=${r.refreshToken}`);
         } catch (e: any) {
+            // Antes este error no se veía en la terminal
+            this.log.error(`Falló el callback de Google: ${e?.message ?? e}`);
             return res.redirect(`${front}/?oauth_error=${encodeURIComponent(e?.message ?? 'error')}`);
         }
     }

@@ -1,0 +1,31 @@
+export type TaskStatus = 'PENDING' | 'IN_PROGRESS' | 'DONE';
+
+export interface Subject { id: string; name: string; difficulty: number; currentGrade: number | null; color: string; _count?: { tasks: number } }
+
+export interface Task {
+    id: string; title: string; description: string | null; subjectId: string | null; subject: Subject | null; dueDate: string;
+    weightPct: number; complexity: number; estimatedHours: number; hoursSpent: number; status: TaskStatus; source: 'MANUAL' | 'EMAIL';
+    priorityScore: number; priorityReason: string; critical: boolean;
+}
+
+export interface Focus { top: Task | null; next: Task[]; overdue: number; dueSoon: number; openCount: number }
+
+export interface Block { id: string; startTime: string; minutes: number; note: string; done: boolean; task: Task }
+export interface Plan { id: string; date: string; availableHours: number; blocks: Block[] }
+
+export interface Proposal {
+    id: string; fromAddress: string; emailSubject: string; subjectHint: string | null; title: string; description: string | null;
+    dueDate: string | null; weightPct: number | null; complexity: number | null; estimatedHours: number | null; confidence: number;
+}
+
+export interface EmailStatus {
+    connected: boolean; pending: number; aiEnabled: boolean;
+    account: { email: string; status: string; lastSyncAt: string | null } | null;
+    lastLog: { ok: boolean; error: string | null; fetched: number; proposed: number; startedAt: string } | null;
+}
+
+export interface Summary {
+    tasks: { total: number; done: number; open: number };
+    criticalOnTimePct: number | null; emailCapturedPct: number; hoursStudied: number;
+    stress: { baseline: number | null; latest: number | null; delta: number | null };
+}
