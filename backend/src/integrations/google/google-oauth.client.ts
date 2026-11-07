@@ -42,6 +42,11 @@ export class GoogleOAuthClient {
         return { id: data.id!, email: (data.email ?? '').toLowerCase(), name: data.name ?? data.email ?? 'Estudiante', verified: !!data.verified_email };
     }
 
+    /** Revoca en Google el permiso de lectura (Ley 1581: el titular puede retirar su autorización). */
+    async revoke(refreshToken: string) {
+        await this.newClient().revokeToken(refreshToken);
+    }
+
     /** Cliente ya autenticado con un refresh token guardado (para leer Gmail sin pedir login otra vez). */
     authorizedClient(refreshToken: string) {
         const client = this.newClient();

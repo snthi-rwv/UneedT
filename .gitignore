@@ -24,3 +24,5 @@ Thumbs.db
 
 # Pruebas
 coverage/
+# Caché de TypeScript
+*.tsbuildinfo

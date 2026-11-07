@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { AiClient } from '../../integrations/ai/ai.client';
 import { GmailClient, RawEmail } from '../../integrations/google/gmail.client';
+import { GoogleOAuthClient } from '../../integrations/google/google-oauth.client';
 import { EmailAccountsRepository } from './email-accounts.repository';
 import { EmailAccountsService } from './email-accounts.service';
 import { EmailExtractorService, ExtractedTask } from './email-extractor.service';
@@ -21,6 +22,7 @@ export class EmailSyncService {
         private readonly gmail: GmailClient,
         private readonly extractor: EmailExtractorService,
         private readonly ai: AiClient,
+        private readonly google: GoogleOAuthClient,
     ) {}
 
     async status(userId: string) {
@@ -106,5 +108,15 @@ export class EmailSyncService {
         }
     }
 
-    disconnect(userId: string) { return this.accounts.disconnect(userId).then(() => ({ ok: true })); }
+    /** Retira la autorización: revoca el permiso en Google, borra la cuenta y suprime los datos del correo. */
+    async disconnect(userId: string) {
+        const account = await this.accounts.find(userId);
+        if (account) {
+            // Si Google ya lo había revocado (o no responde), igual se borran los datos locales
+            await this.google.revoke(this.accounts.refreshTokenOf(account)).catch(() => undefined);
+        }
+        await this.accounts.disconnect(userId);
+        await this.repo.purgeEmailData(userId);
+        return { ok: true };
+    }
 }
