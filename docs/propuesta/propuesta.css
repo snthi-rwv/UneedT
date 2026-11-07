@@ -1,0 +1,80 @@
+/* Estilos de impresión de la propuesta UneedT (se convierte a PDF con Microsoft Edge: ver build.py) */
+@page {
+    size: Letter;
+    margin: 2.5cm 2.5cm 2.3cm 2.5cm;
+    @top-right { content: "UneedT · Formulación y Evaluación de Proyectos"; font: italic 9pt Cambria, Georgia, serif; color: #555; }
+    @bottom-center { content: counter(page); font: 10pt Cambria, Georgia, serif; color: #333; }
+}
+@page :first {
+    @top-right { content: none; }
+    @bottom-center { content: none; }
+}
+
+:root { --ink: #1a1a1a; --accent: #14213d; --soft: #eef1f7; --line: #9aa3b5; }
+html { font: 11.5pt/1.5 Cambria, Georgia, 'Times New Roman', serif; color: var(--ink); }
+body { margin: 0; }
+p { margin: 0 0 .6em; text-align: justify; hyphens: auto; }
+a { color: inherit; text-decoration: none; }
+h1, h2, h3, h4 { font-family: Calibri, 'Segoe UI', sans-serif; color: var(--accent); break-after: avoid; page-break-after: avoid; }
+h2 { font-size: 17pt; margin: 1.4em 0 .5em; border-bottom: 1.5px solid var(--accent); padding-bottom: .15em; }
+h3 { font-size: 13pt; margin: 1.1em 0 .4em; }
+h4 { font-size: 11.5pt; margin: .9em 0 .3em; }
+h2.major { break-before: page; page-break-before: always; margin-top: 0; }
+ul, ol { margin: .2em 0 .7em; padding-left: 1.4em; }
+li { margin-bottom: .25em; text-align: justify; }
+.small { font-size: 9.5pt; }
+.muted { color: #555; }
+.keep { break-inside: avoid; page-break-inside: avoid; }
+
+/* Portada */
+.cover { height: 23cm; display: flex; flex-direction: column; justify-content: space-between; text-align: center; }
+.cover .inst { font: 600 13pt Calibri, sans-serif; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); }
+.cover h1 { font-size: 21pt; line-height: 1.25; margin: 0 0 .6em; }
+.cover .kind { font: 600 14pt Calibri, sans-serif; color: #444; }
+.cover .who p { text-align: center; margin: .15em 0; }
+.cover .rule { width: 40%; margin: 1.2em auto; border-top: 2px solid var(--accent); }
+
+/* Índice */
+.toc { list-style: none; padding: 0; margin: 0; }
+.toc li { display: flex; align-items: baseline; margin: .18em 0; text-align: left; }
+.toc li.l2 { padding-left: 1.6em; font-size: 10.5pt; }
+.toc li.l1 { font-weight: 600; margin-top: .45em; }
+.toc .t { flex: 0 1 auto; }
+.toc .dots { flex: 1 1 auto; border-bottom: 1px dotted #777; margin: 0 .35em; transform: translateY(-.3em); }
+.toc .pg { flex: 0 0 auto; min-width: 1.5em; text-align: right; }
+
+/* Tablas */
+table { width: 100%; border-collapse: collapse; margin: .4em 0 1em; font-size: 9.6pt; line-height: 1.35; }
+caption { caption-side: top; text-align: left; font: 600 10pt Calibri, sans-serif; color: var(--accent); padding-bottom: .35em; }
+th { background: var(--accent); color: #fff; font: 600 9.6pt Calibri, sans-serif; text-align: left; padding: .35em .45em; vertical-align: bottom; }
+td { border-bottom: 1px solid #c9cfdb; padding: .35em .45em; vertical-align: top; text-align: left; }
+tr { break-inside: avoid; page-break-inside: avoid; }
+tbody tr:nth-child(even) td { background: #f6f7fb; }
+td.c, th.c { text-align: center; }
+.mark { color: var(--accent); font-weight: 700; }
+.src { font-size: 9pt; color: #555; margin-top: -.6em; margin-bottom: 1em; }
+
+/* Árboles de problemas y objetivos */
+.tree { display: grid; gap: .45em; margin: .6em 0 1em; break-inside: avoid; }
+.tree .row3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: .45em; }
+.tree .box { border: 1.2px solid var(--line); border-radius: 6px; padding: .45em .55em; font-size: 9.4pt; line-height: 1.3; background: #fff; }
+.tree .box b { display: block; font-family: Calibri, sans-serif; color: var(--accent); margin-bottom: .15em; }
+.tree .core { background: var(--accent); color: #fff; border-color: var(--accent); text-align: center; font-size: 10pt; }
+.tree .core b { color: #ffe45c; }
+.tree .lab { font: 600 9pt Calibri, sans-serif; color: #555; text-transform: uppercase; letter-spacing: .05em; text-align: center; }
+.tree .eff { background: #fdf3f1; }
+.tree .cau { background: #f1f4fb; }
+.tree .fin { background: #eef8f3; }
+
+/* FODA */
+.swot { display: grid; grid-template-columns: 1fr 1fr; gap: .5em; margin: .5em 0 1em; }
+.swot > div { border: 1.2px solid var(--line); border-radius: 6px; padding: .5em .7em; break-inside: avoid; }
+.swot h4 { margin: 0 0 .3em; }
+.swot ul { margin: 0; font-size: 10pt; }
+
+.note { border-left: 4px solid var(--accent); background: var(--soft); padding: .5em .8em; margin: .6em 0 1em; font-size: 10.5pt; }
+.note p:last-child { margin-bottom: 0; }
+.formula { text-align: center; font-style: italic; margin: .5em 0 .8em; }
+.refs p { padding-left: 2em; text-indent: -2em; text-align: left; font-size: 10.5pt; }
+.refs a { word-break: break-all; }
+.newpage { break-before: page; page-break-before: always; margin-top: 0; }

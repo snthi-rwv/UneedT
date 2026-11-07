@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>UneedT — Propuesta de proyecto</title>
+<link rel="stylesheet" href="propuesta.css">
+</head>
+<body>
+
+<!-- ============================ PORTADA ============================ -->
+<section class="cover">
+    <div class="inst">Instituto Tecnológico Metropolitano — ITM</div>
+    <div>
+        <h1>UneedT: Desarrollo de un Aplicativo Web con Inteligencia Artificial para la Priorización Automática de la Carga Académica y la Planificación del Estudio de los Estudiantes del ITM</h1>
+        <div class="rule"></div>
+        <div class="kind">Propuesta de proyecto</div>
+    </div>
+    <div class="who">
+        <p><strong>Elaborado por:</strong></p>
+        <p>Ignacio Pérez</p>
+        <p>Santiago Rueda Pino</p>
+        <p>Esteban Alzate Quintero</p>
+        <div class="rule"></div>
+        <p>Formulación y Evaluación de Proyectos</p>
+        <p>Instituto Tecnológico Metropolitano — ITM</p>
+        <p>Medellín, noviembre de 2026</p>
+    </div>
+</section>
+
+<!-- ============================ RESUMEN ============================ -->
+<h2 class="major" id="resumen" data-notoc>Resumen</h2>
+<p>Este documento presenta la propuesta del proyecto UneedT, un aplicativo web de gestión académica personal asistido por inteligencia artificial (IA), dirigido inicialmente a los estudiantes del Instituto Tecnológico Metropolitano (ITM) de Medellín. La propuesta sigue los pasos del informe de la asignatura y se formula con la Metodología del Marco Lógico (MML), complementada con el Research Project Canvas, un análisis FODA y el marco ágil Scrum para la ejecución del desarrollo.</p>
+<p>El problema central es la parálisis y la sobrecarga cognitiva del estudiante universitario ante múltiples responsabilidades académicas, agravada por la ausencia de herramientas que integren el contexto académico (peso porcentual, complejidad, dificultad de la materia y fechas de entrega) al proceso de priorización. UneedT centralizará las tareas mediante la lectura autorizada del correo del estudiante, propondrá las tareas detectadas para que el estudiante las confirme, calculará su prioridad con un modelo multicriterio refinado por IA y generará un plan de estudio diario por bloques de tiempo.</p>
+<p>El proyecto parte de un prototipo funcional construido con React, NestJS y PostgreSQL, en el que la sincronización con Gmail ya fue verificada de punta a punta con una cuenta real. Los estudios de mercado, técnico y económico, y la evaluación financiera, determinarán su viabilidad antes del lanzamiento piloto previsto para noviembre de 2026.</p>
+<p><strong>Palabras clave:</strong> gestión del tiempo, priorización de tareas, inteligencia artificial, carga académica, planificación del estudio, Marco Lógico, Scrum.</p>
+
+<!-- ============================ ÍNDICE ============================ -->
+<h2 class="major" id="indice" data-notoc>Índice</h2>
+<ol class="toc" id="toc"><!-- lo llena build.py --></ol>
+
+<!-- ============================ 1 ============================ -->
+<h2 class="major" id="s1">1. Introducción</h2>
+<p>La vida académica universitaria se caracteriza por la coexistencia simultánea de varias asignaturas, cada una con sus propias entregas, fechas límite y pesos porcentuales dentro de la calificación final. La información sobre estos compromisos se comunica por canales dispersos —correo institucional, aulas virtuales, comunicación verbal en clase—, lo que dificulta al estudiante mantener un panorama consolidado de sus responsabilidades. La decisión de por dónde empezar recae entonces íntegramente en el estudiante, que debe cruzar mentalmente variables heterogéneas para priorizar. Este proceso, repetido a diario, genera desgaste, procrastinación y una ejecución desequilibrada de la carga académica.</p>
+<p>Las herramientas genéricas de gestión de tareas disponibles en el mercado (Notion, Todoist, Motion, entre otras) no incorporan el contexto académico como variable de decisión y, por tanto, no resuelven el problema de fondo: no basta con listar tareas, es necesario ponderarlas según su impacto real en el resultado académico. UneedT responde a este vacío con tres elementos diferenciadores: la captura automática de tareas desde el correo del estudiante, con confirmación humana; un motor de priorización que pondera cada tarea según su urgencia, su peso en la nota, su complejidad y el riesgo de la materia; y la generación de un plan de estudio diario que indica cómo distribuir el tiempo disponible.</p>
+<p>El documento se organiza según los pasos del informe de la asignatura. Primero se plantea y formula el problema, se justifica el proyecto y se enuncian sus objetivos; luego se desarrollan los marcos conceptual, teórico, histórico y legal, y el estado del arte. Después se describe la metodología —Marco Lógico para la formulación y Scrum para el desarrollo—, junto con la arquitectura del prototipo, el análisis de alternativas, el FODA y los riesgos; siguen el cronograma, el presupuesto, los resultados disponibles y esperados, las conclusiones, las recomendaciones, los comentarios y los anexos (Research Project Canvas y Matriz de Marco Lógico).</p>
+
+<!-- ============================ 2 ============================ -->
+<h2 id="s2">2. Planteamiento y Formulación del Problema</h2>
+<h3 id="s2-1">2.1 Descripción del problema</h3>
+<p>Cuando un estudiante enfrenta simultáneamente varias asignaturas, es él quien debe decidir por dónde empezar, basándose solo en su criterio. Las tareas llegan por canales dispersos, sus pesos y complejidades difieren entre materias, y las herramientas genéricas no entienden el contexto académico. El resultado es que el estudiante se sienta frente al computador sin saber cómo iniciar, pierde tiempo decidiendo y ejecuta su carga académica de manera desequilibrada, con frecuencia dejando para el último momento los trabajos de mayor peso.</p>
+
+<h3 id="s2-2">2.2 Árbol de problemas</h3>
+<p>La Figura 1 resume la relación entre las causas, el problema central y sus efectos.</p>
+<div class="tree">
+    <div class="lab">Efectos</div>
+    <div class="row3">
+        <div class="box eff"><b>Pérdida de tiempo y parálisis por análisis</b>El estudiante gasta energía decidiendo qué hacer en lugar de avanzar en sus trabajos.</div>
+        <div class="box eff"><b>Ejecución desequilibrada y bajo rendimiento</b>Se priorizan por inercia tareas sencillas o de bajo impacto y las de mayor peso quedan para el último minuto.</div>
+        <div class="box eff"><b>Estrés y sensación de agobio continuo</b>La incertidumbre de no tener un plan claro genera ansiedad y desmotivación.</div>
+    </div>
+    <div class="box core"><b>Problema central</b>Parálisis y sobrecarga del estudiante universitario ante múltiples responsabilidades: al carecer de un esquema que evalúe objetivamente el peso y la demanda real de sus compromisos, se abruma, pierde tiempo decidiendo por dónde empezar y ejecuta de manera ineficiente su carga académica.</div>
+    <div class="row3">
+        <div class="box cau"><b>Dificultad para calcular el impacto real</b>Es complejo cruzar mentalmente esfuerzo, porcentaje de nota y complejidad para saber qué tarea exige atención inmediata.</div>
+        <div class="box cau"><b>Fatiga en la toma de decisiones</b>El desgaste de elegir qué tarea atacar primero genera estrés y fomenta la procrastinación.</div>
+        <div class="box cau"><b>Visión fragmentada de las responsabilidades</b>Las tareas llegan por diversos canales (como el correo) y rara vez se tiene el panorama completo.</div>
+    </div>
+    <div class="lab">Causas</div>
+</div>
+<p class="src">Figura 1. Árbol de problemas. Fuente: elaboración propia.</p>
+
+<h3 id="s2-3">2.3 Análisis de involucrados</h3>
+<table>
+    <caption>Cuadro 1. Análisis de involucrados</caption>
+    <thead><tr><th>Actor</th><th>Categoría</th><th>Intereses</th><th>Problemas percibidos</th><th>Recursos y mandatos</th></tr></thead>
+    <tbody>
+        <tr><td>Estudiantes universitarios</td><td>Beneficiario directo</td><td>Reducir la carga cognitiva de organizar tareas; no perder entregas; usar mejor su tiempo.</td><td>Tareas dispersas en varios canales; olvido de entregas; herramientas que no entienden el contexto académico.</td><td>Uso continuo de la aplicación; autorización de lectura del correo; retroalimentación.</td></tr>
+        <tr><td>Equipo gestor</td><td>Grupo desarrollador</td><td>Construir una herramienta funcional, escalable y confiable, y validarla en el mercado.</td><td>Dependencia de proveedores externos (IA, correo, nube); tiempo limitado de desarrollo.</td><td>Conocimiento técnico; administración de la infraestructura; inversión inicial propia.</td></tr>
+        <tr><td>Docentes</td><td>Beneficiario indirecto</td><td>Que los estudiantes entreguen a tiempo y lleguen mejor preparados.</td><td>Entregas tardías o incompletas; desorganización estudiantil.</td><td>Son la fuente de los anuncios y correos que el sistema procesa.</td></tr>
+        <tr><td>ITM — Bienestar Universitario</td><td>Aliado potencial</td><td>Mejorar el desempeño académico y el bienestar de la comunidad.</td><td>Estrés asociado a la mala gestión del tiempo.</td><td>Visibilidad institucional y canales de difusión; administración del correo institucional.</td></tr>
+        <tr><td>Proveedores de infraestructura (nube, IA, Google)</td><td>Aliado técnico</td><td>Adopción de su plataforma y conversión a planes pagos.</td><td>Uso que exceda las cuotas gratuitas o incumpla sus políticas.</td><td>Términos de servicio, cuotas, verificación de aplicaciones y disponibilidad de sus API.</td></tr>
+        <tr><td>Aplicaciones competidoras</td><td>Oponente indirecto</td><td>Retener a los estudiantes en sus plataformas.</td><td>Baja especialización en el contexto académico local.</td><td>Mayor presupuesto y reconocimiento de marca.</td></tr>
+    </tbody>
+</table>
+
+<h3 id="s2-4">2.4 Formulación del problema</h3>
+<p>La pregunta que orientará el proyecto es: <em>¿cómo puede un aplicativo web asistido por inteligencia artificial, que centralice las tareas desde el correo del estudiante y las pondere según su contexto académico, reducir la parálisis y la sobrecarga de los estudiantes del ITM al organizar su carga académica?</em></p>
+<p>De ella se derivan cuatro preguntas de sistematización, alineadas con los objetivos específicos:</p>
+<ol>
+    <li>¿Cuál es el tamaño del segmento de estudiantes del ITM y del área metropolitana de Medellín, qué alternativas usan hoy y cuál es su disposición a pagar por la solución?</li>
+    <li>¿Qué ajustes técnicos, de seguridad y de cumplimiento requiere el prototipo para operar con múltiples usuarios reales?</li>
+    <li>¿Bajo qué precio y estructura de costos será sostenible el modelo freemium?</li>
+    <li>¿Es el proyecto económicamente viable según el Valor Presente Neto, la Tasa Interna de Retorno y el Punto de Equilibrio?</li>
+</ol>
+
+<h3 id="s2-5">2.5 Delimitación del proyecto</h3>
+<p><strong>Temática.</strong> El proyecto comprende el desarrollo y la comercialización de una aplicación web de gestión académica personal asistida por IA. No cubre la gestión de aulas virtuales, la administración de calificaciones por parte del docente ni la comunicación entre estudiantes; su foco es la organización individual del trabajo académico.</p>
+<p><strong>Poblacional.</strong> El mercado objetivo inicial son los estudiantes de pregrado del ITM y, por extensión, los estudiantes universitarios de otras instituciones de Medellín. Una vez validada la propuesta de valor en este segmento, se contempla la expansión progresiva a otras universidades del país.</p>
+<p><strong>Geográfica.</strong> La operación comercial se localizará en Medellín, Colombia. La aplicación, por ser web, es accesible desde cualquier lugar con conexión a internet, pero la divulgación, las alianzas institucionales y la validación de mercado se concentrarán en el área metropolitana del Valle de Aburrá.</p>
+<p><strong>Temporal.</strong> La formulación y evaluación abarcan el segundo semestre académico de 2026 (septiembre a noviembre) y culminan con el lanzamiento piloto en noviembre de 2026. Las proyecciones económicas se calcularán sobre un horizonte de cinco años posteriores al lanzamiento.</p>
+<p><strong>Tecnológica.</strong> En su primera versión, la captura automática funciona con cuentas de Google (Gmail o Google Workspace). La integración con otros proveedores de correo, como Microsoft 365, queda fuera del alcance inicial y se evaluará según el proveedor del correo institucional del ITM.</p>
+
+<!-- ============================ 3 ============================ -->
+<h2 id="s3">3. Justificación</h2>
+<h3 id="s3-1">3.1 Pertinencia del proyecto</h3>
+<p>La procrastinación es un fenómeno extendido entre los universitarios: la revisión metaanalítica de Steel (2007) recoge estimaciones según las cuales entre el 80 % y el 95 % de los estudiantes universitarios incurren en ella. Por su parte, el metaanálisis de Aeon, Faber y Panaccio (2021) encontró que la gestión del tiempo se relaciona de forma moderada con el rendimiento académico y con el bienestar, y de forma negativa con el malestar psicológico. Estos antecedentes indican que apoyar al estudiante en la organización de su tiempo es pertinente para su desempeño y su bienestar. La evidencia citada describe asociaciones generales y no demuestra por sí sola la eficacia de una herramienta concreta; esa eficacia deberá medirse en UneedT con los indicadores de la Matriz de Marco Lógico.</p>
+<h3 id="s3-2">3.2 Justificación académica y social</h3>
+<p>UneedT atenderá una necesidad real de los estudiantes del ITM: dejar de invertir energía en decidir por dónde empezar y destinarla a avanzar en sus trabajos. Ofrecerá además a ITM Bienestar Universitario un posible aliado para atender el estrés asociado a la mala gestión del tiempo y, a los docentes, un beneficio indirecto: estudiantes que cumplan a tiempo y lleguen mejor preparados. Desde lo académico, el proyecto integra los contenidos de la asignatura (MML, estudios de mercado, técnico y económico, evaluación financiera) con un producto real.</p>
+<h3 id="s3-3">3.3 Justificación técnica y de mercado</h3>
+<p>El proyecto parte de un prototipo funcional construido con React, NestJS y PostgreSQL, integrado con Google OAuth 2.0, la API de Gmail y modelos de lenguaje, en el que la sincronización de correo ya fue probada de punta a punta. Esto reduce el riesgo técnico de partida. En el mercado existen herramientas de gestión de tareas y de planificación asistida (véase el Estado del Arte), pero ninguna de las revisadas incorpora de forma nativa el peso porcentual, la complejidad y la situación de cada materia como variables de decisión. Esa brecha, junto con la captura automática desde el correo, sustenta la propuesta de valor de UneedT. Su viabilidad comercial se evaluará mediante los estudios de mercado, técnico y económico previstos para el segundo semestre de 2026.</p>
+<h3 id="s3-4">3.4 Situación deseada: árbol de objetivos</h3>
+<div class="tree">
+    <div class="lab">Fines</div>
+    <div class="row3">
+        <div class="box fin"><b>Eliminación de la parálisis por análisis</b>El estudiante ingresará a la plataforma y conocerá de inmediato su máxima prioridad.</div>
+        <div class="box fin"><b>Ejecución estratégica y mejor rendimiento</b>El esfuerzo se invertirá primero en los compromisos que más impactan la evaluación final.</div>
+        <div class="box fin"><b>Reducción del estrés académico</b>Con planificación automatizada y control de sus responsabilidades, el estudiante disminuirá su ansiedad.</div>
+    </div>
+    <div class="box core"><b>Objetivo central</b>Los estudiantes optimizarán la ejecución de su carga académica mediante un sistema con IA que evaluará el peso real de sus responsabilidades y les propondrá automáticamente un esquema de trabajo priorizado, indicándoles por dónde comenzar.</div>
+    <div class="row3">
+        <div class="box cau"><b>Ponderación inteligente de tareas</b>El sistema combinará peso en la nota, complejidad, fecha de entrega y riesgo de la materia para calcular la importancia real de cada tarea.</div>
+        <div class="box cau"><b>Generación de rutas de acción</b>Un plan diario por bloques de tiempo eliminará la decisión de qué hacer y guiará al estudiante paso a paso.</div>
+        <div class="box cau"><b>Captura y centralización automática</b>La lectura autorizada del correo (OAuth) convertirá avisos dispersos en tareas propuestas, que el estudiante confirmará.</div>
+    </div>
+    <div class="lab">Medios</div>
+</div>
+<p class="src">Figura 2. Árbol de objetivos. Fuente: elaboración propia.</p>
+
+<!-- ============================ 4-5 ============================ -->
+<h2 id="s4">4. Objetivo General</h2>
+<p>Desarrollar y lanzar un aplicativo web de gestión académica personal, asistido por inteligencia artificial y con captura automática de tareas desde el correo del estudiante, que optimice la ejecución de la carga académica de los estudiantes universitarios del ITM mediante la priorización automática de tareas y la generación de un plan de estudio personalizado, con lanzamiento piloto en noviembre de 2026.</p>
+
+<h2 id="s5">5. Objetivos Específicos</h2>
+<ol>
+    <li><strong>(OE1)</strong> Caracterizar el mercado potencial de estudiantes del ITM y del área metropolitana de Medellín mediante un estudio primario que identifique el tamaño del segmento, la disposición a pagar por la solución y las alternativas que usan actualmente.</li>
+    <li><strong>(OE2)</strong> Consolidar la arquitectura técnica del prototipo existente —despliegue en la nube, seguridad, cumplimiento de la política de datos de Google y pruebas con usuarios— para que opere de forma estable con múltiples usuarios reales.</li>
+    <li><strong>(OE3)</strong> Determinar la inversión inicial, los costos operativos y las proyecciones de ingresos del proyecto bajo un modelo freemium, así como el precio del plan de pago a partir de la disposición a pagar identificada en el estudio de mercado.</li>
+    <li><strong>(OE4)</strong> Evaluar la viabilidad económica del proyecto mediante el Valor Presente Neto (VPN), la Tasa Interna de Retorno (TIR) y el Punto de Equilibrio, sobre un horizonte de cinco años.</li>
+    <li><strong>(OE5)</strong> Ejecutar el lanzamiento piloto de la aplicación en noviembre de 2026 en la comunidad del ITM, mediante una estrategia de divulgación que combine el respaldo institucional, la página web del proyecto y los canales personales del equipo.</li>
+</ol>
+
+<!-- ============================ 6 ============================ -->
+<h2 class="major" id="s6">6. Marco Conceptual</h2>
+<p>Los siguientes conceptos delimitan el vocabulario de la propuesta.</p>
+<ul>
+    <li><strong>Carga académica.</strong> Conjunto de asignaturas, entregas, evaluaciones y fechas límite que un estudiante debe atender de forma simultánea en un periodo académico.</li>
+    <li><strong>Priorización de tareas.</strong> Proceso de ordenar las tareas pendientes según su importancia relativa para decidir cuál atender primero. En UneedT se basa en la urgencia (fecha de entrega frente a horas pendientes), el peso porcentual en la nota, la complejidad y el riesgo de la materia (su dificultad y la nota actual del estudiante).</li>
+    <li><strong>Ponderación multicriterio.</strong> Técnica de decisión que combina varios criterios, cada uno con un peso, para obtener una valoración global de cada alternativa (Saaty, 1980).</li>
+    <li><strong>Tarea crítica.</strong> Tarea cuyo puntaje de prioridad alcanza el umbral definido por el sistema (65 sobre 100); es la unidad de medida del primer indicador de Fin.</li>
+    <li><strong>Plan de estudio guiado.</strong> Distribución del tiempo disponible en un día entre las tareas priorizadas, en bloques con hora de inicio, duración, descansos y una indicación concreta de qué hacer en cada uno.</li>
+    <li><strong>Inteligencia artificial y modelos de lenguaje.</strong> Sistemas capaces de realizar tareas que normalmente requieren razonamiento humano; los modelos de lenguaje de gran escala permiten extraer y clasificar información de un texto con pocos ejemplos (Brown et al., 2020). UneedT los usa para interpretar correos, ajustar prioridades y redactar las indicaciones del plan.</li>
+    <li><strong>Sincronización por correo (OAuth 2.0).</strong> Conexión con el correo del estudiante mediante el protocolo de autorización OAuth 2.0, que permite a una aplicación acceder a datos con permisos limitados y revocables, sin conocer la contraseña del usuario (Hardt, 2012). UneedT solicita únicamente permiso de lectura.</li>
+    <li><strong>Panel de confirmación humana.</strong> Pantalla donde el estudiante revisa, ajusta y aprueba o descarta las tareas que la IA propone a partir del correo, antes de incorporarlas a su lista.</li>
+    <li><strong>Modelo freemium.</strong> Esquema comercial con un plan gratuito de funciones básicas y un plan de pago con funciones adicionales.</li>
+    <li><strong>Metodología del Marco Lógico (MML).</strong> Herramienta de planificación que ordena un proyecto en niveles (fin, propósito, componentes y actividades) con indicadores, medios de verificación y supuestos (Ortegón, Pacheco y Prieto, 2005).</li>
+    <li><strong>Scrum.</strong> Marco de trabajo ágil para desarrollar productos complejos mediante ciclos cortos de duración fija (sprints), con roles, eventos y artefactos definidos que favorecen la transparencia, la inspección y la adaptación (Schwaber y Sutherland, 2020).</li>
+    <li><strong>Research Project Canvas y análisis FODA.</strong> Herramientas de síntesis y diagnóstico: el primero resume en bloques los elementos estructurales del proyecto; el segundo identifica fortalezas, debilidades, oportunidades y amenazas.</li>
+</ul>
+
+<!-- ============================ 7 ============================ -->
+<h2 id="s7">7. Marco Teórico</h2>
+<p>Las siguientes teorías explican el problema que UneedT aborda y sustentan sus decisiones de diseño. No se usan como prueba de la eficacia del producto.</p>
+<h3 id="s7-1">7.1 Carga cognitiva</h3>
+<p>La teoría de la carga cognitiva sostiene que la memoria de trabajo tiene capacidad limitada y que las tareas que exigen manejar muchos elementos a la vez reducen los recursos disponibles para otras actividades (Sweller, 1988). Cruzar mentalmente el porcentaje de nota, la complejidad y la fecha de cada entrega es un ejemplo de esa exigencia; UneedT traslada ese cálculo al sistema.</p>
+<h3 id="s7-2">7.2 Procrastinación y teoría de la motivación temporal</h3>
+<p>Steel (2007) describe la procrastinación como una falla de autorregulación y, con base en 691 correlaciones, identifica como predictores fuertes la aversión a la tarea, la demora, la autoeficacia y la impulsividad, entre otros. Desde esta perspectiva, un plan que indique con claridad el siguiente paso y divida el trabajo en bloques concretos puede disminuir la aversión inicial a empezar; esta hipótesis deberá contrastarse con usuarios reales.</p>
+<h3 id="s7-3">7.3 Fatiga de decisión y autorregulación</h3>
+<p>Baumeister, Bratslavsky, Muraven y Tice (1998) propusieron que la autorregulación consume un recurso limitado, idea popularizada como fatiga de decisión. Su réplica multilaboratorio posterior no logró reproducir el efecto central (Hagger et al., 2016); por ello, en esta propuesta la fatiga de decisión se usa como descripción de la experiencia del estudiante y no como mecanismo demostrado.</p>
+<h3 id="s7-4">7.4 Gestión del tiempo y rendimiento académico</h3>
+<p>El metaanálisis de Aeon, Faber y Panaccio (2021) integra 158 estudios y concluye que la gestión del tiempo se asocia de manera moderada con el rendimiento académico, el bienestar y la reducción del malestar psicológico. Esto respalda el interés de ofrecer una herramienta que estructure el tiempo del estudiante, sin garantizar que cualquier herramienta produzca ese efecto.</p>
+<h3 id="s7-5">7.5 Decisión multicriterio</h3>
+<p>El proceso analítico jerárquico propone descomponer una decisión en criterios con pesos relativos y combinarlos para ordenar alternativas (Saaty, 1980). La priorización de UneedT sigue una lógica análoga en dos pasos. Primero, un cálculo determinista y explicable asigna a cada tarea un puntaje de 0 a 100:</p>
+<p class="formula">Prioridad = 100 × (0,35 · urgencia + 0,35 · peso en la nota + 0,15 · complejidad + 0,15 · riesgo de la materia)</p>
+<p>donde cada criterio se normaliza entre 0 y 1: la urgencia depende de la holgura entre los días restantes y las horas pendientes; el peso alcanza su máximo cuando la tarea vale 30 % o más de la nota; y el riesgo combina la dificultad de la materia con la nota actual del estudiante. Segundo, un modelo de lenguaje revisa las tareas más prioritarias y puede ajustar cada puntaje en ±10 puntos, explicando el motivo en lenguaje natural. Si la IA no está disponible, el sistema conserva el puntaje base, de modo que la priorización nunca depende por completo de un proveedor externo. Los pesos se validarán con los indicadores del proyecto y podrán recalibrarse con datos de uso.</p>
+
+<!-- ============================ 8 ============================ -->
+<h2 id="s8">8. Marco Histórico</h2>
+<p>La organización del trabajo académico ha evolucionado en etapas que explican el espacio en el que se ubica UneedT.</p>
+<ul>
+    <li><strong>Agendas y calendarios personales.</strong> Durante décadas el estudiante registró a mano sus entregas; la integración de la información dependía por completo de su disciplina.</li>
+    <li><strong>Aulas virtuales y correo electrónico.</strong> A comienzos de los años 2000 se difundieron plataformas de aprendizaje como Moodle (2002) y servicios de correo masivos como Gmail (2004). Desde entonces, las comunicaciones y entregas se reparten entre varios canales, lo que fragmenta el panorama del estudiante.</li>
+    <li><strong>Gestores digitales de tareas.</strong> Herramientas como Todoist (2007) y Notion (2016) permitieron listas, proyectos y recordatorios sincronizados entre dispositivos, aunque la priorización siguió a cargo del usuario.</li>
+    <li><strong>Inteligencia artificial generativa.</strong> Desde finales de 2022, con la popularización de los asistentes basados en modelos de lenguaje, surgieron herramientas que automatizan parte de la planificación, como los calendarios con programación automática de tareas.</li>
+</ul>
+<p>UneedT se ubica en esta última etapa, al combinar la captura automática desde el correo con una priorización que considera el contexto académico.</p>
+
+<!-- ============================ 9 ============================ -->
+<h2 class="major" id="s9">9. Marco Legal</h2>
+<p>El Cuadro 2 resume las normas y políticas más relevantes para un aplicativo que lee el correo del estudiante y almacena datos personales en Colombia, junto con las medidas que el prototipo ya implementa. Su propósito es académico y no sustituye el concepto de un abogado; la vigencia de cada norma deberá confirmarse antes del lanzamiento.</p>
+<table>
+    <caption>Cuadro 2. Marco normativo aplicable a UneedT</caption>
+    <thead><tr><th style="width:20%">Norma o política</th><th style="width:36%">Contenido relevante</th><th>Implicación y estado en UneedT</th></tr></thead>
+    <tbody>
+        <tr><td>Constitución Política, art. 15</td><td>Reconoce el derecho fundamental al habeas data: conocer, actualizar y rectificar la información recogida en bases de datos.</td><td>El estudiante puede consultar y editar sus tareas y materias en la aplicación. Falta habilitar la eliminación completa de la cuenta.</td></tr>
+        <tr><td>Ley Estatutaria 1581 de 2012</td><td>Régimen general de protección de datos personales. Exige autorización previa, expresa e informada del titular; reconoce el derecho a revocarla y a solicitar la supresión. La vigila la Superintendencia de Industria y Comercio (SIC).</td><td>UneedT será responsable del tratamiento. <em>Implementado:</em> autorización expresa antes de conectar el correo; desconexión que revoca el permiso en Google y suprime los datos del correo; borrado del remitente y del fragmento del correo al resolver cada propuesta; cifrado del token de acceso. <em>Pendiente:</em> publicar la política de tratamiento y un canal de consultas y reclamos.</td></tr>
+        <tr><td>Decreto 1377 de 2013 (compilado en el Decreto 1074 de 2015)</td><td>Reglamenta la Ley 1581: autorización, políticas de tratamiento y responsabilidad demostrada.</td><td>Orienta el texto de la autorización y la política de privacidad que se publicará antes del lanzamiento.</td></tr>
+        <tr><td>Ley 1266 de 2008</td><td>Regula el habeas data financiero; la Ley 1581 excluye de su ámbito las bases de datos regidas por ella.</td><td>No aplica: UneedT no trata información crediticia.</td></tr>
+        <tr><td>Ley 1480 de 2011 (Estatuto del Consumidor) y Ley 527 de 1999</td><td>Protegen al consumidor, incluida la venta a distancia, y reconocen validez a los mensajes de datos y al comercio electrónico.</td><td>Aplicarán al plan de pago: información clara de precio y condiciones, y evidencia electrónica de la aceptación.</td></tr>
+        <tr><td>Ley 1258 de 2008</td><td>Crea la Sociedad por Acciones Simplificada (SAS).</td><td>Opción de formalización para la operación comercial, que se evaluará en el estudio económico.</td></tr>
+        <tr><td>Política de datos de usuario de los servicios de API de Google y alcances de la API de Gmail</td><td>El alcance <code>gmail.readonly</code> es restringido: exige verificación de la aplicación y, si los datos se almacenan o transmiten por servidores propios, una evaluación de seguridad anual realizada por un tercero aprobado por Google. En estado de prueba («Testing»), los tokens de renovación vencen a los 7 días y solo pueden acceder los usuarios de prueba registrados.</td><td>Condiciona el calendario de lanzamiento: el piloto puede operar con usuarios de prueba, pero abrir la lectura de correo al público requiere completar la verificación. Se considera en riesgos y en el presupuesto.</td></tr>
+        <tr><td>CONPES 4144 de 2025 y Proyecto de Ley 43 de 2025 Senado</td><td>El CONPES fija la Política Nacional de Inteligencia Artificial. El proyecto de ley, que propone clasificar los sistemas de IA por riesgo, figuraba en trámite en las fuentes consultadas.</td><td>No se identificó una ley de IA vigente que obligue a UneedT. Se vigilará su evolución; mientras tanto, la Ley 1581 es la norma vinculante principal para sistemas de IA que traten datos personales.</td></tr>
+    </tbody>
+</table>
+
+<!-- ============================ 10 ============================ -->
+<h2 id="s10">10. Estado del Arte</h2>
+<p>Se revisaron herramientas que hoy atienden, total o parcialmente, la organización del trabajo de un estudiante. La consulta se realizó en octubre de 2026 a partir de documentación y reseñas públicas; las funciones y los precios cambian con frecuencia, por lo que deberá actualizarse antes del lanzamiento.</p>
+<table>
+    <caption>Cuadro 3. Herramientas existentes frente a UneedT</caption>
+    <thead><tr><th style="width:14%">Herramienta</th><th style="width:22%">Qué ofrece</th><th>Captura de tareas</th><th>Priorización y planificación</th></tr></thead>
+    <tbody>
+        <tr><td>Motion</td><td>Calendario y gestor de tareas con IA, orientado a profesionales y equipos.</td><td>Las tareas se ingresan con plazo, prioridad y duración estimada; se sincroniza con calendarios de Google y Outlook.</td><td>Programa y reprograma tareas automáticamente según plazos, prioridades y disponibilidad. No se identificó que pondere el peso de la nota ni la complejidad por materia.</td></tr>
+        <tr><td>Todoist</td><td>Gestor de tareas con proyectos, etiquetas y niveles de prioridad.</td><td>Reenvío de correos a un proyecto y complemento para Gmail; su función Email Assist extrae fechas y reescribe el título.</td><td>Los niveles de prioridad (p1 a p4) los define el usuario.</td></tr>
+        <tr><td>Notion</td><td>Espacio de trabajo flexible con notas, bases de datos y funciones de IA.</td><td>Registro manual o mediante plantillas que el propio estudiante construye.</td><td>La priorización depende de cómo el usuario diseñe sus bases de datos.</td></tr>
+        <tr><td>Aulas virtuales (p. ej., Moodle)</td><td>Centralizan actividades y fechas de cada curso dentro de la institución.</td><td>Las tareas las publica el docente en la plataforma de cada institución.</td><td>Muestran fechas, sin ponderar entre materias ni sugerir un plan de estudio.</td></tr>
+        <tr><td><strong>UneedT</strong></td><td>Aplicativo web de gestión académica con IA para estudiantes.</td><td>Lectura del correo con OAuth (solo lectura) cada 30 minutos; la IA propone tareas y el estudiante las confirma. También admite registro manual.</td><td>Puntaje multicriterio (urgencia, peso, complejidad, riesgo de la materia) refinado por IA, con explicación; plan diario por bloques con indicaciones.</td></tr>
+    </tbody>
+</table>
+<p><strong>Brecha identificada.</strong> Las herramientas generales ya automatizan parte de la captura (Todoist) o de la agenda (Motion), por lo que el plan por bloques de tiempo no es, por sí solo, un diferenciador. La brecha que UneedT ocupa es la combinación de captura automática desde el correo con confirmación humana y una priorización fundada en el contexto académico del estudiante. Esta conclusión se limita a las herramientas y fuentes revisadas.</p>
+
+<!-- ============================ 11 ============================ -->
+<h2 class="major" id="s11">11. Metodología</h2>
+<h3 id="s11-1">11.1 Enfoque general</h3>
+<p>El proyecto combina dos marcos complementarios. La <strong>Metodología del Marco Lógico</strong> se usa para la formulación: define el problema, los objetivos, los indicadores y los supuestos (Matriz de Marco Lógico en el Anexo B), y se apoya en el Research Project Canvas y el análisis FODA. <strong>Scrum</strong> se usa para la ejecución del desarrollo: organiza la construcción del producto en sprints cortos que entregan incrementos funcionales y permiten ajustar el rumbo con la retroalimentación de los usuarios. Los estudios de mercado, técnico y económico, y la evaluación financiera, se planifican como elementos del Product Backlog junto con el trabajo de desarrollo.</p>
+<p>El proyecto avanza en tres fases: <em>planeación</em> (problema, objetivos, mercado y arquitectura), <em>desarrollo</em> (construcción iterativa por sprints) y <em>ejecución</em> (despliegue, pruebas con usuarios reales y lanzamiento piloto).</p>
+
+<h3 id="s11-2">11.2 Marco de trabajo Scrum</h3>
+<h4>Roles</h4>
+<ul>
+    <li><strong>Product Owner — Ignacio Pérez (líder del equipo).</strong> Define la visión del producto, prioriza el Product Backlog según el valor para el estudiante y acepta o rechaza los incrementos.</li>
+    <li><strong>Scrum Master — rotativo entre Santiago Rueda Pino y Esteban Alzate Quintero.</strong> Facilita los eventos, protege al equipo de interrupciones y elimina impedimentos. La rotación por sprint distribuye la carga en un equipo de tres personas.</li>
+    <li><strong>Developers — los tres integrantes.</strong> Construyen el incremento: frontend, backend, integraciones, pruebas y despliegue, además de los entregables de los estudios.</li>
+</ul>
+<h4>Artefactos</h4>
+<ul>
+    <li><strong>Product Backlog:</strong> lista priorizada de historias de usuario, agrupadas en épicas que corresponden a los componentes de la MML (C1 a C4) y a los estudios (OE1, OE3, OE4). Ejemplo: «Como estudiante, quiero ver al abrir la aplicación cuál tarea hacer primero y por qué, para no perder tiempo decidiendo».</li>
+    <li><strong>Sprint Backlog:</strong> historias seleccionadas para el sprint, con su plan de tareas técnicas.</li>
+    <li><strong>Incremento:</strong> versión funcional del producto al final de cada sprint, que cumple la Definición de Terminado.</li>
+</ul>
+<h4>Eventos</h4>
+<ul>
+    <li><strong>Sprint:</strong> dos semanas de duración fija.</li>
+    <li><strong>Sprint Planning:</strong> al inicio de cada sprint, se elige el objetivo del sprint y las historias a desarrollar.</li>
+    <li><strong>Daily Scrum:</strong> reunión breve (15 minutos) o reporte asíncrono por mensajería en los días sin encuentro presencial, dada la agenda académica del equipo.</li>
+    <li><strong>Sprint Review:</strong> demostración del incremento al Product Owner y, cuando sea posible, a estudiantes del segmento objetivo.</li>
+    <li><strong>Sprint Retrospective:</strong> revisión de cómo trabajó el equipo y acuerdos de mejora para el siguiente sprint.</li>
+</ul>
+<h4>Definición de Terminado</h4>
+<p>Una historia se considera terminada cuando: (1) el código compila sin errores en backend y frontend; (2) la funcionalidad se probó manualmente en la aplicación con datos de prueba; (3) los cambios están integrados en la rama principal del repositorio con un mensaje de commit descriptivo; (4) los datos personales que involucra cumplen las medidas del Marco Legal; y (5) el Product Owner la aceptó en la Sprint Review.</p>
+<table>
+    <caption>Cuadro 4. Plan de sprints</caption>
+    <thead><tr><th style="width:11%">Sprint</th><th style="width:17%">Fechas (2026)</th><th>Objetivo del sprint e incremento esperado</th><th style="width:11%">Objetivos</th></tr></thead>
+    <tbody>
+        <tr><td>Sprint 1</td><td>1 – 14 sep</td><td>Product Backlog inicial e historias de usuario; diseño y validación del instrumento del estudio de mercado.</td><td>OE1</td></tr>
+        <tr><td>Sprint 2</td><td>15 – 28 sep</td><td>Aplicación y análisis del estudio de mercado; ajuste del modelo de negocio freemium.</td><td>OE1, OE3</td></tr>
+        <tr><td>Sprint 3</td><td>29 sep – 12 oct</td><td>Arquitectura, modelo de datos y autenticación; inicio del estudio económico.</td><td>OE2, OE3</td></tr>
+        <tr><td>Sprint 4</td><td>13 – 26 oct</td><td>Motor de priorización, tareas, materias y plan de estudio; cierre del estudio económico y evaluación financiera.</td><td>OE2, OE3, OE4</td></tr>
+        <tr><td>Sprint 5</td><td>27 oct – 9 nov</td><td>Integración con Gmail (OAuth), panel de confirmación, encuestas, métricas y frontend completo.</td><td>OE2</td></tr>
+        <tr><td>Sprint 6</td><td>10 – 23 nov</td><td>Despliegue en la nube, política de privacidad, solicitud de verificación a Google y pruebas con usuarios piloto.</td><td>OE2, OE5</td></tr>
+        <tr><td>Cierre</td><td>24 – 30 nov</td><td>Lanzamiento piloto en el ITM y divulgación.</td><td>OE5</td></tr>
+    </tbody>
+</table>
+
+<h3 id="s11-3">11.3 Métodos por objetivo específico</h3>
+<table>
+    <caption>Cuadro 5. Método previsto para cada objetivo específico</caption>
+    <thead><tr><th style="width:9%">Objetivo</th><th>Método</th><th>Producto esperado</th></tr></thead>
+    <tbody>
+        <tr><td class="c">OE1</td><td>Estudio primario (encuesta) con estudiantes del ITM y del área metropolitana; el tamaño de la muestra y el instrumento se definirán en el estudio.</td><td>Tamaño del segmento, disposición a pagar y alternativas actuales.</td></tr>
+        <tr><td class="c">OE2</td><td>Estudio técnico sobre el prototipo: despliegue en la nube, gestión de secretos, verificación de la aplicación ante Google y pruebas con varios usuarios, desarrollados en los sprints 3 a 6.</td><td>Aplicación estable en producción y sincronización de correo operativa para usuarios reales.</td></tr>
+        <tr><td class="c">OE3</td><td>Estudio económico: inversión inicial, costos operativos e ingresos bajo modelo freemium.</td><td>Estructura de costos y precio del plan de pago.</td></tr>
+        <tr><td class="c">OE4</td><td>Evaluación financiera con VPN, TIR y Punto de Equilibrio a cinco años.</td><td>Concepto de viabilidad económica.</td></tr>
+        <tr><td class="c">OE5</td><td>Lanzamiento piloto y estrategia de divulgación con el ITM, la página web del proyecto y los canales del equipo.</td><td>Aplicación lanzada en noviembre de 2026 y primeros usuarios activos.</td></tr>
+    </tbody>
+</table>
+
+<h3 id="s11-4">11.4 Arquitectura técnica del prototipo</h3>
+<p>El Cuadro 6 resume la arquitectura actual, punto de partida del estudio técnico (OE2).</p>
+<table>
+    <caption>Cuadro 6. Componentes de la arquitectura de UneedT</caption>
+    <thead><tr><th style="width:18%">Capa</th><th style="width:27%">Tecnología</th><th>Función y decisiones de diseño</th></tr></thead>
+    <tbody>
+        <tr><td>Interfaz de usuario</td><td>React 18, TypeScript, Vite</td><td>Aplicación web de una sola página con seis pantallas: Hoy, Tareas, Materias, Plan de estudio, Correo y Progreso.</td></tr>
+        <tr><td>API</td><td>NestJS 10 (Node.js, TypeScript)</td><td>API REST organizada por módulos; validación estricta de entradas, cabeceras de seguridad y límite de peticiones en rutas sensibles.</td></tr>
+        <tr><td>Datos</td><td>PostgreSQL con Prisma ORM</td><td>Esquema relacional con migraciones versionadas: usuarios, materias, tareas, cuentas de correo, bitácora de sincronización (<code>EmailSyncLog</code>), correos procesados, propuestas, planes, bloques y encuestas.</td></tr>
+        <tr><td>Autenticación</td><td>Correo y contraseña (bcrypt) o Google; JWT</td><td>Token de acceso de 15 minutos y token de renovación de 7 días, rotativo y de un solo uso; en la base de datos solo se guarda su hash.</td></tr>
+        <tr><td>Captura desde el correo</td><td>Google OAuth 2.0 y API de Gmail (<code>gmail.readonly</code>)</td><td>El token de renovación se guarda cifrado (AES-256-GCM). Una tarea programada revisa el correo cada 30 minutos; el estudiante también puede revisarlo a demanda. La IA analiza los correos en lotes y solo propone tareas con confianza suficiente.</td></tr>
+        <tr><td>Inteligencia artificial</td><td>Cliente compatible con la API de OpenAI; proveedor configurable (Groq, Gemini, OpenRouter o Anthropic)</td><td>Modelo principal y de respaldo definidos en variables de entorno. Si la IA falla, la aplicación sigue funcionando con el cálculo base de prioridad y notas predeterminadas en el plan.</td></tr>
+        <tr><td>Priorización</td><td>Módulo propio</td><td>Puntaje multicriterio de 0 a 100 (sección 7.5), recalculado cuando cambian las tareas o pasa el tiempo; ajuste de la IA acotado a ±10 puntos.</td></tr>
+        <tr><td>Plan de estudio</td><td>Módulo propio con apoyo de IA</td><td>Reparte las horas disponibles entre las ocho tareas más prioritarias, con descansos de 10 minutos; marcar un bloque como hecho suma horas estudiadas y recalcula la prioridad.</td></tr>
+        <tr><td>Analítica</td><td>Módulo propio</td><td>Calcula por usuario los indicadores de Fin y Propósito: tareas críticas entregadas a tiempo, cambio en el agobio y porcentaje de tareas capturadas desde el correo.</td></tr>
+    </tbody>
+</table>
+
+<h3 id="s11-5">11.5 Análisis de alternativas</h3>
+<p>Se evaluaron tres estrategias para capturar la información académica que alimenta el motor de priorización:</p>
+<ul>
+    <li><strong>Registro manual.</strong> El estudiante registra las tareas a mano.</li>
+    <li><strong>Sincronización por correo.</strong> Lectura autorizada del correo (OAuth) para que la IA extraiga y clasifique las tareas, con un panel de confirmación humana.</li>
+    <li><strong>Aulas virtuales.</strong> Integración directa con las aulas virtuales institucionales (Moodle u otras) para leer las tareas desde la fuente oficial.</li>
+</ul>
+<table>
+    <caption>Cuadro 7. Comparación de alternativas de captura de información</caption>
+    <thead><tr><th style="width:18%">Criterio</th><th>Registro manual</th><th>Sincronización por correo</th><th>Aulas virtuales</th></tr></thead>
+    <tbody>
+        <tr><td>Costo y tiempo</td><td>Bajo, corto plazo.</td><td>Medio; el prototipo ya la implementa.</td><td>Alto, largo plazo.</td></tr>
+        <tr><td>Viabilidad técnica</td><td>Alta.</td><td>Alta: API estables y protocolo OAuth estándar; requiere verificación de Google para uso público.</td><td>Baja: requiere convenios institucionales.</td></tr>
+        <tr><td>Automatización e impacto</td><td>Bajo: persiste el desgaste del registro.</td><td>Alto: automatiza la fuente más común de avisos.</td><td>Medio: limitado a instituciones que cooperen.</td></tr>
+        <tr><td>Riesgo principal</td><td>Abandono por fatiga de registro.</td><td>Errores de la IA y dependencia de políticas del proveedor, mitigados con el panel de confirmación.</td><td>Bloqueo por falta de permisos institucionales.</td></tr>
+    </tbody>
+</table>
+<p>Se selecciona la <strong>sincronización por correo</strong>, por su equilibrio entre viabilidad técnica y automatización efectiva. El correo es un canal presente en cualquier universidad, lo que permite capturar el contexto académico sin el desgaste del registro manual y sin las barreras institucionales de conectarse con las aulas virtuales de cada universidad. El registro manual se conserva como complemento, para tareas que no llegan por correo y para los estudiantes que prefieran no conectarlo.</p>
+
+<h3 id="s11-6">11.6 Análisis FODA</h3>
+<p>El FODA se orienta al producto proyectado, es decir, a la aplicación en su condición futura de oferta al mercado. Las fortalezas y debilidades son factores internos; las oportunidades y amenazas, factores externos del entorno competitivo y regulatorio.</p>
+<div class="swot">
+    <div><h4>Fortalezas</h4><ul>
+        <li>Prototipo funcional, con la captura desde Gmail verificada de punta a punta; no es una idea en papel.</li>
+        <li>Priorización que considera el contexto de la materia, su dificultad y el rendimiento del estudiante, no solo el peso de la nota, y que explica sus motivos.</li>
+        <li>Plan de estudio diario construido sobre el contexto académico, con indicaciones concretas por bloque.</li>
+        <li>Arquitectura con proveedor de IA intercambiable y funcionamiento garantizado aunque la IA falle.</li>
+        <li>Equipo de tres integrantes con roles definidos en Scrum.</li>
+    </ul></div>
+    <div><h4>Debilidades</h4><ul>
+        <li>El producto aún no se ha probado a escala con usuarios reales.</li>
+        <li>El modelo de precios no se ha validado con el segmento objetivo.</li>
+        <li>Marca nueva, sin reconocimiento ni confianza construida.</li>
+        <li>La captura automática solo funciona con cuentas de Google en esta versión.</li>
+        <li>La divulgación depende en parte de un apoyo institucional aún no formalizado.</li>
+    </ul></div>
+    <div><h4>Oportunidades</h4><ul>
+        <li>Mercado estudiantil amplio con una necesidad real y poco atendida en el nicho de gestión académica.</li>
+        <li>Posible respaldo del ITM para promocionar la aplicación en su comunidad.</li>
+        <li>Creciente aceptación de la IA como herramienta legítima de estudio y productividad.</li>
+        <li>Modelos de IA con planes gratuitos o de bajo costo, que reducen el costo operativo inicial.</li>
+    </ul></div>
+    <div><h4>Amenazas</h4><ul>
+        <li>Competencia establecida y con mayor presupuesto (Notion, Todoist, Motion).</li>
+        <li>Si el producto no se percibe como distinto, puede no resultar novedoso para el usuario final.</li>
+        <li>Requisitos de verificación y cambios en las políticas de acceso a las API de correo (Gmail, Microsoft 365).</li>
+        <li>Desconfianza de los estudiantes a otorgar acceso a su correo.</li>
+    </ul></div>
+</div>
+
+<h3 class="newpage" id="s11-7">11.7 Análisis de riesgos y supuestos críticos</h3>
+<table>
+    <caption>Cuadro 8. Análisis de riesgos y medidas de mitigación</caption>
+    <thead><tr><th style="width:27%">Riesgo</th><th class="c" style="width:11%">Probabilidad</th><th class="c" style="width:9%">Impacto</th><th>Medida de mitigación</th></tr></thead>
+    <tbody>
+        <tr><td>La verificación de Google para el alcance restringido <code>gmail.readonly</code> no se obtiene antes del lanzamiento.</td><td class="c">Alta</td><td class="c">Alto</td><td>Iniciar el trámite en el Sprint 6; operar el piloto con usuarios de prueba registrados; mantener el registro manual como alternativa completa; explorar con el ITM una aplicación de uso interno si su correo es de Google Workspace.</td></tr>
+        <tr><td>El correo institucional del ITM no es de Google (p. ej., Microsoft 365).</td><td class="c">Media</td><td class="c">Alto</td><td>Confirmar el proveedor en el Sprint 6; si es Microsoft, planear la integración con Microsoft Graph en un sprint posterior; mientras tanto, permitir conectar una cuenta de Gmail personal o registrar las tareas a mano.</td></tr>
+        <tr><td>Descontinuación de modelos de IA por parte del proveedor sin aviso suficiente.</td><td class="c">Alta</td><td class="c">Medio</td><td><em>Ya implementado:</em> proveedor y modelos parametrizados en variables de entorno, modelo de respaldo y cálculo base que no depende de la IA. Monitorear los anuncios de deprecación.</td></tr>
+        <tr><td>Baja disposición de los estudiantes a dar acceso a su correo por desconfianza.</td><td class="c">Media-alta</td><td class="c">Alto</td><td>Comunicar el alcance limitado del permiso (solo lectura); publicar una política de privacidad clara; mostrar que los datos se borran al desconectar; ofrecer valor completo sin obligar la conexión.</td></tr>
+        <tr><td>Límites de cuota gratuita de las API externas ante el crecimiento de usuarios.</td><td class="c">Media</td><td class="c">Medio</td><td>Monitorear el consumo; definir el umbral de migración a planes pagos; ajustar la frecuencia de la revisión automática y el tamaño de los lotes enviados a la IA.</td></tr>
+        <tr><td>Aplicaciones competidoras con mayor presupuesto capturan al segmento antes del lanzamiento.</td><td class="c">Media</td><td class="c">Alto</td><td>Acelerar el piloto en el ITM; diferenciarse por la integración con el correo y la priorización académica.</td></tr>
+    </tbody>
+</table>
+
+<!-- ============================ 12 ============================ -->
+<h2 class="major" id="s12">12. Cronograma</h2>
+<p>El proyecto se ejecutará entre septiembre y noviembre de 2026, en coherencia con la delimitación temporal y el plan de sprints (Cuadro 4).</p>
+<table>
+    <caption>Cuadro 9. Cronograma de actividades del proyecto</caption>
+    <thead>
+        <tr><th rowspan="2">Actividad</th><th class="c" colspan="2">Septiembre</th><th class="c" colspan="2">Octubre</th><th class="c" colspan="3">Noviembre</th><th class="c" rowspan="2">Objetivo</th></tr>
+        <tr><th class="c">S1</th><th class="c">S2</th><th class="c">S3</th><th class="c">S4</th><th class="c">S5</th><th class="c">S6</th><th class="c">Cierre</th></tr>
+    </thead>
+    <tbody>
+        <tr><td>Estudio de mercado</td><td class="c mark">■</td><td class="c mark">■</td><td></td><td></td><td></td><td></td><td></td><td class="c">OE1</td></tr>
+        <tr><td>Ajustes al modelo de negocio</td><td></td><td class="c mark">■</td><td></td><td></td><td></td><td></td><td></td><td class="c">OE3</td></tr>
+        <tr><td>Estudio técnico y construcción del prototipo</td><td></td><td></td><td class="c mark">■</td><td class="c mark">■</td><td class="c mark">■</td><td></td><td></td><td class="c">OE2</td></tr>
+        <tr><td>Estudio económico</td><td></td><td></td><td class="c mark">■</td><td class="c mark">■</td><td></td><td></td><td></td><td class="c">OE3</td></tr>
+        <tr><td>Evaluación del proyecto (VPN, TIR, Punto de Equilibrio)</td><td></td><td></td><td></td><td class="c mark">■</td><td></td><td></td><td></td><td class="c">OE4</td></tr>
+        <tr><td>Despliegue, verificación ante Google y pruebas piloto</td><td></td><td></td><td></td><td></td><td></td><td class="c mark">■</td><td></td><td class="c">OE2, OE5</td></tr>
+        <tr><td>Lanzamiento piloto y divulgación</td><td></td><td></td><td></td><td></td><td></td><td class="c mark">■</td><td class="c mark">■</td><td class="c">OE5</td></tr>
+    </tbody>
+</table>
+
+<!-- ============================ 13 ============================ -->
+<h2 id="s13">13. Presupuesto</h2>
+<p>Las cifras se cuantificarán en el estudio económico (OE3). Por ahora se identifican los rubros que el presupuesto deberá contemplar y la situación actual de cada uno. La financiación inicial provendrá de una inversión propia del equipo, con posibilidad de financiamiento externo posterior.</p>
+<table>
+    <caption>Cuadro 10. Rubros del presupuesto</caption>
+    <thead><tr><th style="width:22%">Rubro</th><th>Descripción</th><th style="width:30%">Situación actual</th><th class="c" style="width:11%">Valor</th></tr></thead>
+    <tbody>
+        <tr><td>Talento humano</td><td>Horas de trabajo de los tres integrantes en desarrollo, estudios y divulgación.</td><td>Aporte del equipo; se valorará como costo de oportunidad.</td><td class="c">Por cuantificar</td></tr>
+        <tr><td>Equipos</td><td>Computadores y conectividad del equipo.</td><td>Equipos propios existentes.</td><td class="c">Por cuantificar</td></tr>
+        <tr><td>Hosting e infraestructura en la nube</td><td>Servidor de la API, base de datos PostgreSQL administrada, alojamiento del frontend y despliegue continuo.</td><td>El prototipo corre en entorno de desarrollo; el proveedor se elegirá en el Sprint 6.</td><td class="c">Por cuantificar</td></tr>
+        <tr><td>Consumo de API de inteligencia artificial</td><td>Llamadas al modelo para extracción de tareas, ajuste de prioridades y notas del plan.</td><td>Opera con planes gratuitos; el costo crecerá con el número de usuarios.</td><td class="c">Por cuantificar</td></tr>
+        <tr><td>Verificación y cumplimiento</td><td>Verificación de la aplicación ante Google, evaluación de seguridad anual por un tercero y adecuación a la Ley 1581 de 2012 (política de tratamiento).</td><td>Pendiente; el costo depende del evaluador y del alcance.</td><td class="c">Por cuantificar</td></tr>
+        <tr><td>Dominio y página web</td><td>Dominio propio y sitio del proyecto para la divulgación.</td><td>Pendiente.</td><td class="c">Por cuantificar</td></tr>
+        <tr><td>Divulgación</td><td>Promoción del lanzamiento piloto.</td><td>Pendiente.</td><td class="c">Por cuantificar</td></tr>
+        <tr><td>Formalización (opcional)</td><td>Constitución de una SAS, si el estudio económico lo recomienda.</td><td>Por decidir.</td><td class="c">Por cuantificar</td></tr>
+        <tr><td>Imprevistos</td><td>Reserva para contingencias, como porcentaje del total.</td><td>Se definirá en el estudio económico.</td><td class="c">Por cuantificar</td></tr>
+    </tbody>
+</table>
+
+<!-- ============================ 14 ============================ -->
+<h2 id="s14">14. Bibliografía</h2>
+<div class="refs">
+    <p>Aeon, B., Faber, A., y Panaccio, A. (2021). Does time management work? A meta-analysis. <em>PLOS ONE, 16</em>(1), e0245066. https://doi.org/10.1371/journal.pone.0245066</p>
+    <p>Baumeister, R. F., Bratslavsky, E., Muraven, M., y Tice, D. M. (1998). Ego depletion: Is the active self a limited resource? <em>Journal of Personality and Social Psychology, 74</em>(5), 1252–1265.</p>
+    <p>Brown, T. B., et al. (2020). Language models are few-shot learners. <em>Advances in Neural Information Processing Systems, 33</em>, 1877–1901.</p>
+    <p>Hagger, M. S., et al. (2016). A multilab preregistered replication of the ego-depletion effect. <em>Perspectives on Psychological Science, 11</em>(4), 546–573.</p>
+    <p>Ortegón, E., Pacheco, J. F., y Prieto, A. (2005). <em>Metodología del marco lógico para la planificación, el seguimiento y la evaluación de proyectos y programas</em>. CEPAL, Serie Manuales n.º 42.</p>
+    <p>Saaty, T. L. (1980). <em>The analytic hierarchy process</em>. McGraw-Hill.</p>
+    <p>Steel, P. (2007). The nature of procrastination: A meta-analytic and theoretical review of quintessential self-regulatory failure. <em>Psychological Bulletin, 133</em>(1), 65–94. https://doi.org/10.1037/0033-2909.133.1.65</p>
+    <p>Sweller, J. (1988). Cognitive load during problem solving: Effects on learning. <em>Cognitive Science, 12</em>(2), 257–285.</p>
+</div>
+
+<!-- ============================ 15 ============================ -->
+<h2 class="major" id="s15">15. Presentación, Análisis e Interpretación de Resultados</h2>
+<p>Al ser una propuesta, el proyecto aún no cuenta con resultados de uso ni de mercado. Esta sección presenta el estado actual del prototipo y el esquema con el que se presentarán, analizarán e interpretarán los resultados cuando existan.</p>
+<h3 id="s15-1">15.1 Resultados disponibles a la fecha</h3>
+<p>A noviembre de 2026 existe un prototipo funcional que se ejecuta en entorno de desarrollo, con el código versionado en un repositorio Git. El Cuadro 11 resume el estado de cada módulo.</p>
+<table>
+    <caption>Cuadro 11. Estado del prototipo por componente</caption>
+    <thead><tr><th style="width:26%">Componente (MML)</th><th>Funcionalidad disponible</th><th style="width:20%">Estado</th></tr></thead>
+    <tbody>
+        <tr><td>C1. Motor de priorización</td><td>Puntaje multicriterio, ajuste y explicación por IA, detección de tareas críticas, pantalla «Hoy» con la tarea por la que empezar.</td><td>Operativo</td></tr>
+        <tr><td>C2. Captura desde el correo y panel de confirmación</td><td>Inicio de sesión con Google, conexión de Gmail con autorización expresa, revisión automática cada 30 minutos, propuestas editables, desconexión con revocación y supresión de datos.</td><td>Operativo; verificado de punta a punta con una cuenta real</td></tr>
+        <tr><td>C3. Planificación y seguimiento</td><td>Gestión de tareas y materias, plan de estudio diario por bloques, encuesta de agobio y panel de indicadores.</td><td>Operativo</td></tr>
+        <tr><td>C4. Infraestructura y despliegue</td><td>Base de datos relacional con migraciones, configuración por variables de entorno, seguridad de la API.</td><td>Despliegue en la nube y verificación de Google pendientes (Sprint 6)</td></tr>
+    </tbody>
+</table>
+
+<h3 id="s15-2">15.2 Esquema de análisis de resultados esperados</h3>
+<table>
+    <caption>Cuadro 12. Indicadores que se presentarán y analizarán</caption>
+    <thead><tr><th style="width:12%">Nivel</th><th>Indicador y meta</th><th style="width:28%">Fuente de datos</th><th style="width:14%">Estado</th></tr></thead>
+    <tbody>
+        <tr><td>Fin</td><td>Al menos el 80 % de las tareas críticas se completan antes de su fecha límite, a los 6 meses de uso continuo.</td><td>Tabla de tareas en PostgreSQL (estado, fecha de entrega y de finalización); módulo de analítica.</td><td>Instrumento listo; pendiente de medición</td></tr>
+        <tr><td>Fin</td><td>Reducción de al menos 1 punto en el promedio de agobio académico (escala 1–5) frente a la primera respuesta, a los 6 meses.</td><td>Encuesta de agobio integrada en la aplicación.</td><td>Instrumento listo; pendiente de medición</td></tr>
+        <tr><td>Propósito</td><td>Al menos 50 usuarios activos mensuales en la comunidad del ITM a los 3 meses del lanzamiento piloto.</td><td>Consultas sobre la base de datos (usuarios con actividad en el mes).</td><td>Pendiente de medición</td></tr>
+        <tr><td>Propósito</td><td>Al menos el 30 % de las tareas proviene de la captura automática por correo, a los 3 meses del piloto.</td><td>Origen de cada tarea (manual o correo) y cuentas de correo conectadas.</td><td>Instrumento listo; pendiente de medición</td></tr>
+        <tr><td>Componentes</td><td>C1: 100 % de las tareas con prioridad asignada y ≥ 95 % de respuestas válidas de la IA; C2: ≥ 95 % de sincronizaciones exitosas al mes; C3: módulos con persistencia total en base de datos; C4: disponibilidad &gt; 99 % mensual.</td><td>Registros del servidor; tabla <code>EmailSyncLog</code>; monitoreo del proveedor de nube.</td><td>C1–C3 operativos; C4 en construcción</td></tr>
+    </tbody>
+</table>
+
+<h3 id="s15-3">15.3 Criterios de interpretación</h3>
+<p>Cada resultado se comparará con su meta y con su línea base. Si la meta se cumple, se interpretará a la luz de los supuestos de la Matriz de Marco Lógico (por ejemplo, uso sostenido y confianza para otorgar permisos de lectura); si no se cumple, se analizarán las causas posibles —fricción en la conexión del correo, errores de la IA o baja adopción— y se ajustará el producto en los sprints siguientes antes de extender el piloto. Como el estudio será observacional, no podrá atribuirse causalmente el cambio en el rendimiento a la herramienta sin un grupo de comparación; esa limitación se declarará al presentar los resultados.</p>
+
+<!-- ============================ 16 ============================ -->
+<h2 id="s16">16. Bibliografía o Cibergrafía</h2>
+<p class="muted small">Fuentes electrónicas consultadas entre octubre y noviembre de 2026.</p>
+<div class="refs">
+    <p>Congreso de Colombia. (2012). <em>Ley Estatutaria 1581 de 2012, por la cual se dictan disposiciones generales para la protección de datos personales</em>. https://www.dmsjuridica.com/buscador_20179478954/legislacion/leyes/2020/11/24/ley-1581-de-2012/</p>
+    <p>Departamento Nacional de Planeación. (2025). <em>Documento CONPES 4144: Política Nacional de Inteligencia Artificial</em>. https://colaboracion.dnp.gov.co/CDT/Conpes/Econ%C3%B3micos/4144.pdf</p>
+    <p>Google. (s. f.-a). <em>Gmail API scopes</em>. https://developers.google.com/workspace/gmail/api/auth/scopes</p>
+    <p>Google. (s. f.-b). <em>Google API Services User Data Policy</em>. https://developers.google.com/terms/api-services-user-data-policy</p>
+    <p>Google. (s. f.-c). <em>Restricted scope verification</em>. https://developers.google.com/identity/protocols/oauth2/production-readiness/restricted-scope-verification</p>
+    <p>Google. (s. f.-d). <em>Using OAuth 2.0 to access Google APIs</em>. https://developers.google.com/identity/protocols/oauth2</p>
+    <p>Hardt, D. (Ed.). (2012). <em>The OAuth 2.0 authorization framework</em> (RFC 6749). Internet Engineering Task Force. https://datatracker.ietf.org/doc/html/rfc6749</p>
+    <p>Microsoft. (s. f.). <em>Outlook mail API overview (Microsoft Graph)</em>. https://learn.microsoft.com/en-us/graph/api/resources/mail-api-overview</p>
+    <p>Morgen. (2026). <em>Motion review (2026): Features, pricing, pros &amp; cons</em>. https://www.morgen.so/blog-posts/motion-review</p>
+    <p>OECD.AI. (2026). <em>Artificial Intelligence Bill in Colombia</em> [Policy Navigator]. https://oecd.ai/en/dashboards/policy-initiatives/artificial-intelligence-bill-in-colombia</p>
+    <p>Schwaber, K., y Sutherland, J. (2020). <em>La Guía Scrum</em>. https://scrumguides.org/scrum-guide.html</p>
+    <p>Senado de la República de Colombia. (2025). <em>Informe de ponencia para primer debate al Proyecto de Ley 43 de 2025 Senado, por medio del cual se regula la inteligencia artificial en Colombia</em>. Gaceta del Congreso 2349 de 2025. https://www.redjurista.com/Compilaciones2018/gacetasCongreso/2025/gc_2349_2025.pdf</p>
+    <p>Todoist. (s. f.). <em>Forward emails to Todoist</em>. https://get.todoist.help/hc/en-us/articles/360000249160</p>
+</div>
+
+<!-- ============================ 17-19 ============================ -->
+<h2 class="major" id="s17">17. Conclusiones</h2>
+<ol>
+    <li>El problema que UneedT aborda está bien delimitado: la parálisis y la sobrecarga del estudiante al decidir por dónde empezar, originadas en la dificultad de calcular el impacto real de las tareas, la fatiga de decisión y la visión fragmentada de las responsabilidades.</li>
+    <li>La sincronización con el correo es la alternativa de captura más equilibrada entre viabilidad técnica y automatización, frente al registro manual y a la integración con aulas virtuales; el registro manual se conserva como complemento.</li>
+    <li>El estado del arte muestra que la planificación con IA y la conversión de correos en tareas ya existen en herramientas generales; el diferencial de UneedT está en combinar la captura automática con confirmación humana y una priorización según el contexto académico, no en el plan por bloques por sí solo.</li>
+    <li>El riesgo técnico de partida es bajo: el prototipo ya integra priorización, captura desde Gmail, plan de estudio e indicadores, y la sincronización de correo funciona de punta a punta.</li>
+    <li>El marco legal y las políticas de Google condicionan el calendario: la Ley 1581 de 2012 exige autorización, revocación y supresión —ya implementadas en el prototipo— y el alcance restringido de Gmail exige una verificación que debe planearse antes de abrir la aplicación al público.</li>
+    <li>Combinar el Marco Lógico para la formulación con Scrum para el desarrollo permite medir el proyecto con indicadores claros y, a la vez, ajustar el producto sprint a sprint con la retroalimentación de los usuarios.</li>
+    <li>La viabilidad económica y de mercado aún no está demostrada; dependerá de los resultados del estudio de mercado, del estudio económico y de la evaluación financiera.</li>
+</ol>
+
+<h2 id="s18">18. Recomendaciones</h2>
+<ol>
+    <li>Validar la disposición a pagar con estudiantes del segmento objetivo antes de fijar el precio del plan de pago.</li>
+    <li>Publicar la política de tratamiento de datos, habilitar un canal de consultas y reclamos y permitir la eliminación completa de la cuenta, conforme a la Ley 1581 de 2012.</li>
+    <li>Confirmar cuanto antes el proveedor del correo institucional del ITM; si es Microsoft 365, incluir la integración con Microsoft Graph en el Product Backlog.</li>
+    <li>Iniciar la verificación de la aplicación ante Google en el Sprint 6 e incluir su tiempo y costo en el calendario y en el estudio económico.</li>
+    <li>Formalizar por escrito el apoyo institucional del ITM para la divulgación.</li>
+    <li>Comunicar la propuesta de valor con base en el contexto académico y la captura automática, y no en el plan por bloques como función exclusiva.</li>
+    <li>Mantener parametrizados el proveedor y los modelos de IA, y monitorear sus anuncios de deprecación.</li>
+    <li>Medir desde el piloto los indicadores de la Matriz de Marco Lógico y, de ser posible, incluir un grupo de comparación para interpretar el efecto sobre el rendimiento.</li>
+</ol>
+
+<h2 id="s19">19. Comentarios</h2>
+<p>Esta propuesta corresponde a la etapa de formulación del proyecto, por lo que sus alcances deben leerse como planes y no como logros, salvo el estado del prototipo descrito en la sección 15.1. Los valores del presupuesto y los resultados de uso y de mercado quedan pendientes de los estudios correspondientes. El marco legal y el estado del arte se elaboraron con fuentes públicas consultadas entre octubre y noviembre de 2026; ambos cambian con rapidez y deberán actualizarse antes del lanzamiento.</p>
+<p>Esta versión, de noviembre de 2026, actualiza la de octubre: describe la arquitectura real del prototipo (React, NestJS y PostgreSQL), refleja que la sincronización con Gmail ya funciona de punta a punta, incorpora Scrum como marco de desarrollo, ajusta los objetivos, indicadores y actividades de la Matriz de Marco Lógico a ese estado e incluye los requisitos de verificación de Google en el marco legal, los riesgos y el presupuesto.</p>
+
+<!-- ============================ 20 ============================ -->
+<h2 class="major" id="s20">20. Anexos</h2>
+<h3 id="anexo-a">Anexo A. Research Project Canvas</h3>
+<p>El Canvas sintetiza en diez bloques los elementos estructurales de la propuesta.</p>
+<table>
+    <caption>Cuadro 13. Research Project Canvas de UneedT</caption>
+    <thead><tr><th style="width:18%">Bloque</th><th>Contenido</th></tr></thead>
+    <tbody>
+        <tr><td>Problema</td><td>Ante varias asignaturas simultáneas, el estudiante decide por dónde empezar solo con su criterio. UneedT no decidirá únicamente por el peso de la nota: considerará la urgencia, la complejidad, la dificultad de cada materia y el rendimiento del estudiante, para eliminar la sensación de sentarse frente al computador sin saber cómo iniciar.</td></tr>
+        <tr><td>Objetivos</td><td>Desarrollar y lanzar una aplicación funcional que asista a los estudiantes en su día a día académico, con un plan de estudio guiado (por ejemplo, tres horas de una materia, cuatro de otra y quince minutos para cerrar una tarea final) al servicio de ese objetivo.</td></tr>
+        <tr><td>Resultados e impacto</td><td>Que UneedT compita con las aplicaciones de productividad existentes, sea bien recibida por los estudiantes y que quienes la adopten mejoren su manejo del tiempo, entreguen a tiempo sus tareas críticas y reduzcan su agobio.</td></tr>
+        <tr><td>Participantes</td><td>Ignacio Pérez, líder del equipo y Product Owner; Santiago Rueda Pino y Esteban Alzate Quintero, desarrolladores y Scrum Master por rotación.</td></tr>
+        <tr><td>Metodología</td><td>Marco Lógico para la formulación y Scrum para el desarrollo, en sprints de dos semanas. Fases: planeación, desarrollo y ejecución (despliegue, pruebas con usuarios y lanzamiento piloto).</td></tr>
+        <tr><td>Divulgación</td><td>Página web propia del proyecto; apoyo institucional del ITM; difusión en las cuentas personales de los integrantes.</td></tr>
+        <tr><td>Cronograma</td><td>Septiembre: estudio de mercado y ajustes al modelo de negocio. Octubre: estudio técnico, estudio económico y evaluación financiera. Noviembre: cierre del desarrollo, despliegue, verificación ante Google y lanzamiento piloto.</td></tr>
+        <tr><td>Recursos</td><td>Tecnológicos: prototipo construido con React, NestJS, PostgreSQL, Google OAuth y API de IA. Humanos: los tres integrantes. Financieros: inversión inicial propia, con posible financiamiento externo posterior.</td></tr>
+        <tr><td>Criterios de viabilidad</td><td>Cumplir los criterios de viabilidad de mercado, técnica y económica de la asignatura; que el modelo de negocio cubra sus costos operativos y pueda escalar a otras universidades sin rediseño estructural.</td></tr>
+        <tr><td>Presupuesto</td><td>Talento humano, infraestructura en la nube, consumo de IA, verificación y cumplimiento, dominio y divulgación. Las cifras se detallarán en el estudio económico.</td></tr>
+    </tbody>
+</table>
+
+<h3 class="newpage" id="anexo-b">Anexo B. Matriz de Marco Lógico</h3>
+<table class="small">
+    <caption>Cuadro 14. Matriz de Marco Lógico de UneedT</caption>
+    <thead><tr><th style="width:11%">Nivel</th><th style="width:25%">Resumen narrativo</th><th style="width:27%">Indicadores</th><th style="width:19%">Medios de verificación</th><th>Supuestos</th></tr></thead>
+    <tbody>
+        <tr>
+            <td><strong>Fin</strong></td>
+            <td>Contribuir a la mejora del rendimiento académico y a la reducción del estrés estudiantil mediante la ejecución estratégica de un plan de trabajo priorizado por IA.</td>
+            <td>1. Al menos el 80 % de las tareas críticas se completan antes de su fecha límite, a los 6 meses de uso continuo. Línea base: porcentaje medido en las primeras cuatro semanas de uso.<br>2. Reducción de al menos 1 punto en el promedio de agobio académico (escala 1–5) a los 6 meses. Línea base: primera respuesta de cada usuario.</td>
+            <td>Consultas sobre la tabla de tareas; encuesta de agobio integrada en la aplicación.</td>
+            <td>Los estudiantes que adoptan la herramienta mantienen un uso sostenido durante el periodo de medición.</td>
+        </tr>
+        <tr>
+            <td><strong>Propósito</strong></td>
+            <td>Los estudiantes optimizan la ejecución de su carga académica mediante una plataforma que centraliza, extrae del correo y prioriza automáticamente sus responsabilidades con IA.</td>
+            <td>1. Al menos 50 usuarios activos mensuales en la comunidad del ITM a los 3 meses del lanzamiento piloto.<br>2. Al menos el 30 % de las tareas proviene de la captura automática por correo a los 3 meses del piloto.</td>
+            <td>Consultas sobre la base de datos (actividad de usuarios y origen de las tareas); cuentas de correo conectadas.</td>
+            <td>Los estudiantes confían en la herramienta y otorgan permisos de lectura sin fricción significativa; Google aprueba la verificación de la aplicación.</td>
+        </tr>
+        <tr>
+            <td><strong>Componentes</strong></td>
+            <td>C1. Motor de ponderación y priorización de tareas operativo.<br>C2. Módulo de captura desde el correo (OAuth) y panel de confirmación operativo.<br>C3. Módulos de planificación y seguimiento operativos.<br>C4. Infraestructura en la nube y despliegue continuo configurados.</td>
+            <td>C1: 100 % de las tareas con prioridad y ≥ 95 % de respuestas válidas de la IA.<br>C2: ≥ 95 % de sincronizaciones exitosas al mes.<br>C3: módulos con persistencia total en base de datos.<br>C4: disponibilidad &gt; 99 % mensual.</td>
+            <td>Registros del servidor; tabla <code>EmailSyncLog</code>; monitoreo del proveedor de nube.</td>
+            <td>El proveedor de IA y las API de correo mantienen su estabilidad y disponibilidad.</td>
+        </tr>
+        <tr>
+            <td><strong>Actividades</strong></td>
+            <td>A1. Desarrollar el motor de priorización y el pipeline de extracción con IA.<br>A2. Integrar Google OAuth, la API de Gmail y la revisión programada del correo.<br>A3. Desarrollar los módulos de tareas, materias, plan de estudio, encuestas y analítica.<br>A4. Desplegar en la nube con despliegue continuo, variables de entorno y verificación ante Google.</td>
+            <td>A1, A2 y A3: 100 % en el prototipo (noviembre de 2026); A2 verificada de punta a punta con una cuenta real.<br>A4: planeada para el Sprint 6.</td>
+            <td>Historial de commits del repositorio; configuración del proveedor de nube; estado de verificación en la consola de Google Cloud.</td>
+            <td>Los servicios en la nube mantienen planes viables durante el piloto.</td>
+        </tr>
+    </tbody>
+</table>
+
+</body>
+</html>
