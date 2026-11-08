@@ -5,7 +5,12 @@ const PRODUCTIVE_HOURS_PER_DAY = 3;
 const clamp = (n: number, a: number, b: number) => Math.min(Math.max(n, a), b);
 
 export interface TaskInput { dueDate: Date; weightPct: number; complexity: number; estimatedHours: number; hoursSpent: number }
-export interface SubjectInput { difficulty: number; currentGrade: number | null }
+export interface SubjectInput {
+    difficulty: number;
+    currentGrade: number | null;
+    gradeRisk?: number | null; // riesgo calculado con las notas registradas (0 a 1); si existe, manda sobre currentGrade
+    neededToPass?: number | null; // nota que necesita en lo que falta para aprobar
+}
 
 /**
  * Puntaje base 0-100:
@@ -18,8 +23,10 @@ export function scoreTask(t: TaskInput, s: SubjectInput | null, now = new Date()
     const urgency = slack <= 0 ? 1 : 1 / (1 + slack / 3);
     const weight = clamp(t.weightPct / 30, 0, 1); // 30% de la nota o más = máximo
     const complexity = (t.complexity - 1) / 4;
-    const gradeRisk = s?.currentGrade != null ? clamp((3.5 - s.currentGrade) / 3.5, 0, 1) : 0.3;
-    const risk = s ? 0.6 * ((s.difficulty - 1) / 4) + 0.4 * gradeRisk : 0.3;
+    // Con notas registradas, el riesgo real de perder la materia pesa más que la dificultad que el estudiante le puso
+    const hasGrades = s?.gradeRisk != null;
+    const gradeRisk = hasGrades ? s!.gradeRisk! : s?.currentGrade != null ? clamp((3.5 - s.currentGrade) / 3.5, 0, 1) : 0.3;
+    const risk = s ? (hasGrades ? 0.3 : 0.6) * ((s.difficulty - 1) / 4) + (hasGrades ? 0.7 : 0.4) * gradeRisk : 0.3;
 
     // Los dos factores que más pesaron explican el resultado en una frase
     const factors = [
@@ -35,6 +42,9 @@ export function scoreTask(t: TaskInput, s: SubjectInput | null, now = new Date()
         }
         if (k === 'weight') return `vale ${t.weightPct}% de la nota`;
         if (k === 'complexity') return 'es de alta complejidad';
+        if (s?.neededToPass != null && s.neededToPass > 0 && s.neededToPass <= 5) {
+            return `necesitas ${s.neededToPass.toFixed(2)} en lo que falta de la materia`;
+        }
         return 'la materia necesita refuerzo';
     };
     const sentence = `${words(factors[0].k)} y ${words(factors[1].k)}`;

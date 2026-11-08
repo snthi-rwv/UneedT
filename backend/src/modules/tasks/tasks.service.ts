@@ -28,6 +28,12 @@ export class TasksService {
         return { top: open[0] ?? null, next: open.slice(1), overdue, dueSoon, openCount };
     }
 
+    // Fichas del panel izquierdo: tareas vencidas sin entregar y tareas abiertas (consulta liviana)
+    async counts(userId: string) {
+        const [overdue, open] = await Promise.all([this.repo.countOpen(userId, { lt: new Date() }), this.repo.countOpen(userId)]);
+        return { overdue, open };
+    }
+
     async create(userId: string, dto: CreateTaskDto) {
         if (dto.subjectId) await this.mustOwnSubject(userId, dto.subjectId);
         const task = await this.repo.create({ ...dto, userId });

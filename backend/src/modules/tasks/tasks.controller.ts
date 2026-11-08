@@ -14,6 +14,7 @@ export class TasksController {
         return this.svc.list(u.id, { status, subjectId });
     }
     @Get('focus') focus(@CurrentUser() u: AuthUser) { return this.svc.focus(u.id); }
+    @Get('counts') counts(@CurrentUser() u: AuthUser) { return this.svc.counts(u.id); }
     @Post('prioritize') prioritize(@CurrentUser() u: AuthUser) { return this.svc.prioritizeWithAi(u.id); }
     @Post('prioritize/auto') autoPrioritize(@CurrentUser() u: AuthUser) { return this.svc.autoPrioritize(u.id); }
     @Post() create(@CurrentUser() u: AuthUser, @Body() dto: CreateTaskDto) { return this.svc.create(u.id, dto); }

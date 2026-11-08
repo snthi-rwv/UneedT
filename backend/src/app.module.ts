@@ -18,6 +18,7 @@ import { SurveysModule } from './modules/surveys/surveys.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { HealthModule } from './modules/health/health.module';
 import { GuidesModule } from './modules/guides/guides.module';
+import { ActivityModule } from './modules/activity/activity.module';
 
 @Module({
     imports: [
@@ -39,6 +40,7 @@ import { GuidesModule } from './modules/guides/guides.module';
         SurveysModule,
         AnalyticsModule,
         GuidesModule,
+        ActivityModule,
         HealthModule,
     ],
     providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],

@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { Prisma } from '@prisma/client';
 import { AiClient } from '../../integrations/ai/ai.client';
 import { DocumentTextService } from '../../integrations/documents/document-text.service';
+import { ActivityService } from '../activity/activity.service';
 import { PriorityService } from '../priority/priority.service';
 import { StudyPlanService } from '../study-plan/study-plan.service';
 import { GuideDto, StepActionDto } from './dto/guide.dto';
@@ -24,6 +25,7 @@ export class GuidesService {
         private readonly docs: DocumentTextService,
         private readonly priority: PriorityService,
         private readonly plans: StudyPlanService,
+        private readonly activity: ActivityService,
     ) {}
 
     // Tareas abiertas con su plan específico. "now" permite al navegador corregir la diferencia de reloj del cronómetro.
@@ -117,14 +119,17 @@ export class GuidesService {
             case 'start':
                 if (step.done) throw new BadRequestException('Este paso ya está terminado.');
                 if (!step.runningSince) {
-                    await this.stopAllRunning(userId, now);
+                    await this.stopAllRunning(userId, now); // ya registra el tiempo del cronómetro que pausa
                     await this.repo.updateStep(step.id, { runningSince: now });
                 }
                 await this.repo.markInProgress(taskId);
                 break;
 
             case 'pause':
-                if (step.runningSince) await this.repo.updateStep(step.id, { spentSeconds: step.spentSeconds + elapsed, runningSince: null });
+                if (step.runningSince) {
+                    await this.repo.updateStep(step.id, { spentSeconds: step.spentSeconds + elapsed, runningSince: null });
+                    await this.activity.log(userId, elapsed);
+                }
                 break;
 
             case 'finish': {
@@ -134,6 +139,8 @@ export class GuidesService {
                 await this.repo.updateStep(step.id, { done: true, doneAt: now, spentSeconds: spent, runningSince: null, creditedSeconds: credit });
                 await this.repo.addTaskHours(taskId, (credit - step.creditedSeconds) / 3600);
                 await this.repo.markInProgress(taskId);
+                // Tiempo de estudio del día: el tramo del cronómetro, o lo estimado si nunca se usó
+                await this.activity.log(userId, spent > 0 ? elapsed : credit);
                 hoursChanged = true;
                 break;
             }
@@ -142,12 +149,17 @@ export class GuidesService {
                 if (!step.done) break;
                 await this.repo.updateStep(step.id, { done: false, doneAt: null, creditedSeconds: 0 });
                 await this.repo.addTaskHours(taskId, -step.creditedSeconds / 3600);
+                if (step.spentSeconds === 0) await this.activity.log(userId, -step.creditedSeconds); // era tiempo estimado, no medido
                 hoursChanged = true;
                 break;
 
             case 'adjust': {
                 if (dto.minutes === undefined) throw new BadRequestException('Indica cuántos minutos dedicaste.');
                 const spent = dto.minutes * 60;
+                // Lo que ya estaba en el registro del día: lo medido, o lo estimado si se marcó sin cronómetro
+                const logged = step.spentSeconds > 0 ? step.spentSeconds : step.done ? step.creditedSeconds : 0;
+                const effective = step.done && spent === 0 ? step.minutes * 60 : spent;
+                await this.activity.log(userId, effective - logged);
                 if (step.done) {
                     const credit = spent > 0 ? spent : step.minutes * 60;
                     await this.repo.updateStep(step.id, { spentSeconds: spent, runningSince: null, creditedSeconds: credit });
@@ -172,6 +184,7 @@ export class GuidesService {
         for (const s of await this.repo.runningSteps(userId)) {
             const elapsed = Math.min(Math.round((now.getTime() - s.runningSince!.getTime()) / 1000), MAX_SEGMENT_S);
             await this.repo.updateStep(s.id, { spentSeconds: s.spentSeconds + elapsed, runningSince: null });
+            await this.activity.log(userId, elapsed);
         }
     }
 

@@ -5,6 +5,7 @@ import { mins } from '../lib/format';
 import { clock, realSeconds, timeTone, useNow } from '../lib/timer';
 import ContextDialog from '../components/ContextDialog';
 import TaskPlanCard from '../components/TaskPlanCard';
+import { notifyStudy } from '../components/StreakBadge';
 import { Empty, Err, PageHead, useLoad } from '../components/ui';
 import { Block, GuideList, GuideResult, Intensity, Plan as PlanT, TaskWithGuide } from '../types';
 
@@ -15,22 +16,30 @@ const INTENSITIES: [Intensity, string, string][] = [
     ['INTENSE', 'Intensa', 'Bloques de 60 min, descansos de 10'],
 ];
 
-// Qué pasos del plan específico tocan en cada bloque del plan general (en orden, según los minutos del bloque)
-function stepsPerBlock(blocks: Block[], tasks: TaskWithGuide[]) {
-    const queues = new Map(tasks.filter((t) => t.guide).map((t) => [t.id, t.guide!.steps.filter((s) => !s.done)]));
-    const out = new Map<string, string[]>();
-    for (const b of blocks) {
-        const q = queues.get(b.taskId);
-        if (b.done || !q?.length) continue;
-        const names: string[] = [];
-        let used = 0;
-        while (q.length && (!names.length || used + q[0].minutes <= b.minutes)) {
-            used += q[0].minutes;
-            names.push(q.shift()!.title);
-        }
-        out.set(b.id, names);
-    }
-    return out;
+const toMin = (t: string) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+const hhmm = (m: number) => `${String(Math.floor(m / 60) % 24).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+
+/**
+ * En el plan general cada tarea aparece una sola vez, aunque la intensidad la parta en varios bloques con descansos.
+ * Se agrupan sus bloques y se muestra de qué hora a qué hora va, cuánto tiempo suma y en cuántos bloques.
+ */
+function groupByTask(blocks: Block[]) {
+    const groups = new Map<string, Block[]>();
+    for (const b of blocks) groups.set(b.taskId, [...(groups.get(b.taskId) ?? []), b]);
+    return [...groups.values()].map((bs) => {
+        const last = bs[bs.length - 1];
+        return {
+            taskId: bs[0].taskId,
+            task: bs[0].task,
+            blocks: bs,
+            note: bs.find((b) => b.note)?.note ?? '',
+            start: bs[0].startTime,
+            end: hhmm(toMin(last.startTime) + last.minutes),
+            minutes: bs.reduce((n, b) => n + b.minutes, 0),
+            allDone: bs.every((b) => b.done),
+            someDone: bs.some((b) => b.done),
+        };
+    });
 }
 
 // Tareas agrupadas por materia; los grupos van en el orden de su tarea más prioritaria
@@ -74,7 +83,7 @@ export default function Plan() {
     const runningTask = tasks.find((t) => t.guide?.steps.some((s) => s.runningSince));
     const runningStep = runningTask?.guide?.steps.find((s) => s.runningSince);
     const nowMs = useNow(!!runningStep, offset);
-    const hints = useMemo(() => stepsPerBlock(plan?.blocks ?? [], tasks), [plan, tasks]);
+    const slots = useMemo(() => groupByTask(plan?.blocks ?? []), [plan]);
 
     const generate = async (e: FormEvent) => {
         e.preventDefault();
@@ -106,16 +115,26 @@ export default function Plan() {
         }
     };
 
-    const toggle = async (b: Block) => {
+    // "Hecho" marca (o desmarca) todos los bloques de esa tarea
+    const toggle = async (blocks: Block[], allDone: boolean) => {
         setActionError('');
-        try { await api(`/study-plan/blocks/${b.id}`, { method: 'PATCH', body: { done: !b.done } }); await reload(); }
-        catch (er) { setActionError((er as Error).message); }
+        try {
+            for (const b of blocks.filter((x) => x.done === allDone)) {
+                await api(`/study-plan/blocks/${b.id}`, { method: 'PATCH', body: { done: !allDone } });
+            }
+            await reload();
+            notifyStudy();
+        } catch (er) {
+            setActionError((er as Error).message);
+            reload();
+        }
     };
 
     // Cuando cambia el plan de una tarea, se actualiza solo esa tarjeta (y el plan general si se recalculó)
     const onGuide = (r: GuideResult, action?: string) => {
         guides.setData((d) => d && { ...d, now: r.now, tasks: d.tasks.map((t) => (t.id === r.task.id ? r.task : t)) });
         if (action === 'start') guides.reload(); // al iniciar un cronómetro, el servidor pausa el que estuviera corriendo en otra tarea
+        if (action && action !== 'start') notifyStudy(); // pausar, terminar o corregir cambia el tiempo de hoy: se actualiza la racha
         if (r.replanned) { reload(); setNotice('Paso a paso listo. Como cambió el tiempo que necesita la tarea, también recalculamos tu plan de hoy.'); }
     };
 
@@ -163,7 +182,7 @@ export default function Plan() {
                         ))}
                     </div>
                 </fieldset>
-                <p className="muted small plan-hint">El tiempo se reparte según la prioridad de cada tarea. Si una tarea tiene paso a paso, verás qué pasos te tocan en cada bloque.</p>
+                <p className="muted small plan-hint">El tiempo se reparte según la prioridad de cada tarea, en bloques con descansos. Si una tarea tiene paso a paso, lo abres desde el plan general.</p>
                 <div><button className="btn primary" disabled={!!busy}>{busy === 'gen' ? 'Armando el plan…' : plan ? 'Rehacer plan' : 'Armar mi plan'}</button></div>
             </form>
 
@@ -188,25 +207,34 @@ export default function Plan() {
                         <i style={{ width: `${total ? (done / total) * 100 : 0}%` }} />
                     </div>
                     <ol className="timeline">
-                        {plan.blocks.map((b) => (
-                            <li key={b.id} className={b.done ? 'done' : ''}>
-                                <time>{b.startTime}</time>
-                                <div className="grow">
-                                    <strong>{b.task.title}</strong>
-                                    <small>{b.task.subject?.name ?? 'Sin materia'} · {mins(b.minutes)}</small>
-                                    {hints.get(b.id)?.length ? (
-                                        <p className="block-steps">
-                                            <button type="button" className="link" onClick={() => goToTask(b.taskId)}>
-                                                Pasos de este bloque
-                                            </button>: {hints.get(b.id)!.join(' · ')}
-                                        </p>
-                                    ) : b.note && <p>{b.note}</p>}
-                                </div>
-                                <label className="inline">
-                                    <input type="checkbox" checked={b.done} onChange={() => toggle(b)} /> Hecho
-                                </label>
-                            </li>
-                        ))}
+                        {slots.map((g) => {
+                            const guide = tasks.find((t) => t.id === g.taskId)?.guide;
+                            const pending = guide?.steps.filter((st) => !st.done) ?? [];
+                            return (
+                                <li key={g.taskId} className={g.allDone ? 'done' : ''}>
+                                    <time>{g.start}<small>a {g.end}</small></time>
+                                    <div className="grow">
+                                        <strong>{g.task.title}</strong>
+                                        <small>
+                                            {g.task.subject?.name ?? 'Sin materia'} · {mins(g.minutes)}
+                                            {g.blocks.length > 1 && ` en ${g.blocks.length} bloques con descansos`}
+                                        </small>
+                                        {guide ? (
+                                            <p className="block-steps">
+                                                <button type="button" className="link" onClick={() => goToTask(g.taskId)}>Pasos de esta tarea</button>
+                                                {pending.length
+                                                    ? <>: sigue con <strong>{pending[0].title}</strong>{pending.length > 1 && ` y ${pending.length - 1} más`}</>
+                                                    : ': ya completaste todos'}
+                                            </p>
+                                        ) : g.note && <p>{g.note}</p>}
+                                    </div>
+                                    <label className="inline">
+                                        <input type="checkbox" checked={g.allDone} ref={(el) => { if (el) el.indeterminate = g.someDone && !g.allDone; }}
+                                            onChange={() => toggle(g.blocks, g.allDone)} /> Hecho
+                                    </label>
+                                </li>
+                            );
+                        })}
                     </ol>
                 </section>
             )}

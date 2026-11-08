@@ -8,6 +8,9 @@ export const tokens = {
     clear() { localStorage.removeItem('uneedt_access'); localStorage.removeItem('uneedt_refresh'); },
 };
 
+// Se lanza después de cualquier cambio exitoso (crear, editar, terminar…): el panel refresca racha y contadores
+export const DATA_CHANGED = 'uneedt:changed';
+
 export class ApiError extends Error {
     constructor(message: string, public status: number) { super(message); }
 }
@@ -56,5 +59,6 @@ export async function api<T>(path: string, opts: { method?: string; body?: unkno
         const m = data?.message;
         throw new ApiError(Array.isArray(m) ? m.join('. ') : m || 'Algo salió mal. Inténtalo de nuevo.', res.status);
     }
+    if (method !== 'GET' && !path.startsWith('/auth/')) window.dispatchEvent(new Event(DATA_CHANGED));
     return data as T;
 }

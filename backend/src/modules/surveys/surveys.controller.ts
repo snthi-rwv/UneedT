@@ -10,5 +10,5 @@ export class SurveysController {
     constructor(private readonly svc: SurveysService) {}
 
     @Get() list(@CurrentUser() u: AuthUser) { return this.svc.list(u.id); }
-    @Post() create(@CurrentUser() u: AuthUser, @Body() dto: CreateSurveyDto) { return this.svc.create(u.id, dto.score); }
+    @Post() create(@CurrentUser() u: AuthUser, @Body() dto: CreateSurveyDto) { return this.svc.create(u.id, dto); }
 }

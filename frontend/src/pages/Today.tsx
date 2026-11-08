@@ -8,7 +8,7 @@ import MonthCalendar from '../components/MonthCalendar';
 import ContextDialog from '../components/ContextDialog';
 import { EmailStatus, Focus, Guide, GuideList, Task } from '../types';
 
-// Página principal: responde a la pregunta "¿por dónde empiezo?"
+// Inicio: responde a la pregunta "¿por dónde empiezo?"
 export default function Today() {
     const navigate = useNavigate();
     const { user } = useAuth();
@@ -103,32 +103,6 @@ export default function Today() {
                         {top.status === 'PENDING' && <Link className="btn" to="/plan">Ver plan del día</Link>}
                     </div>
                 </section>
-            )}
-
-            {data && data.openCount > 0 && (
-                <div className="stats">
-                    <div className={data.overdue ? 'bad' : ''}><b>{data.overdue}</b><span>vencidas</span></div>
-                    <div className={data.dueSoon ? 'warn' : ''}><b>{data.dueSoon}</b><span>vencen en 48 h</span></div>
-                    <div><b>{data.openCount}</b><span>abiertas</span></div>
-                </div>
-            )}
-
-            {!!data?.next.length && (
-                <>
-                    <h3>Después</h3>
-                    <ul className="list">
-                        {data.next.map((t) => (
-                            <li key={t.id}>
-                                <ScoreChip task={t} />
-                                <div className="grow">
-                                    <strong>{t.title}</strong>
-                                    <small>{t.subject?.name ?? 'Sin materia'} · {t.priorityReason}</small>
-                                </div>
-                                <DueText iso={t.dueDate} />
-                            </li>
-                        ))}
-                    </ul>
-                </>
             )}
 
             {!!all.data?.length && (

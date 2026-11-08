@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { AiClient } from '../../integrations/ai/ai.client';
-import { CRITICAL_THRESHOLD, scoreTask } from './priority.calculator';
+import { gradeRisk, gradeSummary } from '../subjects/grades.calc';
+import { CRITICAL_THRESHOLD, scoreTask, SubjectInput } from './priority.calculator';
 import { PRIORITY_SYSTEM_PROMPT } from './priority.prompts';
 import { PriorityRepository } from './priority.repository';
 
@@ -8,6 +9,14 @@ const DAY = 86_400_000;
 const AUTO_EVERY_MS = 6 * 3_600_000; // repriorización automática con IA: como máximo una cada 6 horas
 const clamp = (n: number, a: number, b: number) => Math.min(Math.max(n, a), b);
 const round1 = (n: number) => Math.round(n * 10) / 10;
+type SubjectWithGrades = { difficulty: number; currentGrade: number | null; targetGrade: number; grades: { percent: number; grade: number }[] };
+
+// Datos de la materia para la prioridad: si tiene notas registradas, el riesgo sale de lo que necesita para aprobar
+function subjectInput(s: SubjectWithGrades | null): SubjectInput | null {
+    if (!s) return null;
+    const sum = gradeSummary(s.grades, s.targetGrade);
+    return { difficulty: s.difficulty, currentGrade: s.currentGrade, gradeRisk: gradeRisk(sum), neededToPass: sum.status === 'empty' ? null : sum.neededToPass };
+}
 
 @Injectable()
 export class PriorityService {
@@ -21,7 +30,7 @@ export class PriorityService {
         const now = new Date();
         const open = await this.repo.openTasks(userId);
         await this.repo.saveScores(open.map((t) => {
-            const base = scoreTask(t, t.subject, now);
+            const base = scoreTask(t, subjectInput(t.subject), now);
             const score = round1(clamp(base.score + t.aiAdjustment, 0, 100));
             return { id: t.id, priorityScore: score, priorityReason: t.aiReason || base.reason, critical: score >= CRITICAL_THRESHOLD };
         }));
@@ -32,7 +41,7 @@ export class PriorityService {
         const now = new Date();
         const open = await this.repo.openTasks(userId);
         const top = open
-            .map((t) => ({ t, base: scoreTask(t, t.subject, now).score }))
+            .map((t) => ({ t, base: scoreTask(t, subjectInput(t.subject), now).score }))
             .sort((a, b) => b.base - a.base)
             .slice(0, 15);
         if (!top.length || !this.ai.enabled) {
@@ -47,6 +56,10 @@ export class PriorityService {
             materia: t.subject?.name ?? null,
             dificultadMateria: t.subject?.difficulty ?? null,
             notaActual: t.subject?.currentGrade ?? null,
+            ...(t.subject?.grades.length && (() => {
+                const g = gradeSummary(t.subject.grades, t.subject.targetGrade);
+                return { porcentajeEvaluado: g.evaluatedPct, notaNecesariaParaAprobar: g.neededToPass, materiaYaAprobada: g.status === 'secured' || g.passed === true };
+            })()),
             pesoPct: t.weightPct,
             complejidad: t.complexity,
             horasPendientes: Math.max(t.estimatedHours - t.hoursSpent, 0),

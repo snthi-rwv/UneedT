@@ -62,6 +62,7 @@ model User {
   plans         StudyPlan[]
   surveys       Survey[]
   guides        TaskGuide[]
+  studyDays     StudyDay[]
 }
 
 // Refresh tokens de UneedT. Se guarda solo el hash (SHA-256), nunca el token.
@@ -85,10 +86,12 @@ model Subject {
   difficulty   Int      @default(3) // 1 (fácil) a 5 (muy difícil)
   currentGrade Float? // escala colombiana 0.0 - 5.0
   color        String   @default("#14213D")
+  targetGrade  Float    @default(3) // nota final que quiere sacar (se aprueba con 3.0)
   createdAt    DateTime @default(now())
 
-  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tasks Task[]
+  user   User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks  Task[]
+  grades GradeEntry[]
 
   @@unique([userId, name])
 }
@@ -220,11 +223,13 @@ model StudyBlock {
 
 // Indicador de Fin: puntuación de agobio académico (1-5)
 model Survey {
-  id        String     @id @default(cuid())
-  userId    String
-  score     Int
-  kind      SurveyKind
-  createdAt DateTime   @default(now())
+  id            String     @id @default(cuid())
+  userId        String
+  score         Int // agobio (1-5): indicador de la Matriz de Marco Lógico
+  concentration Int? // concentración percibida (1-5)
+  performance   Int? // rendimiento percibido (1-5)
+  kind          SurveyKind
+  createdAt     DateTime   @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -268,4 +273,30 @@ model GuideStep {
   guide TaskGuide @relation(fields: [guideId], references: [id], onDelete: Cascade)
 
   @@index([guideId, order])
+}
+
+// Notas del semestre en una materia: qué porcentaje se evaluó y qué nota sacó
+model GradeEntry {
+  id        String   @id @default(cuid())
+  subjectId String
+  order     Int
+  label     String   @default("") // ej.: "Parcial 1" (opcional)
+  percent   Float // % de la nota final (0 a 100)
+  grade     Float // nota obtenida (0.0 a 5.0)
+  createdAt DateTime @default(now())
+
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@index([subjectId, order])
+}
+
+// Tiempo de estudio por día (hora de Colombia): alimenta la racha y el tablero de progreso
+model StudyDay {
+  userId  String
+  date    String // AAAA-MM-DD
+  seconds Int    @default(0)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, date])
 }

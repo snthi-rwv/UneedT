@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PlanIntensity } from '@prisma/client';
 import { AiClient } from '../../integrations/ai/ai.client';
+import { ActivityService } from '../activity/activity.service';
 import { PriorityService } from '../priority/priority.service';
 import { GeneratePlanDto } from './dto/study-plan.dto';
 import { allocateMinutes } from './plan-allocator';
@@ -17,6 +18,7 @@ export class StudyPlanService {
         private readonly repo: StudyPlanRepository,
         private readonly priority: PriorityService,
         private readonly ai: AiClient,
+        private readonly activity: ActivityService,
     ) {}
 
     /** Arma el plan del día desde cero: reparte las horas según la prioridad y la intensidad elegida. */
@@ -126,6 +128,7 @@ export class StudyPlanService {
             // Si la tarea tiene pasos, las horas ya las suman los pasos: el bloque no las cuenta otra vez
             const hours = (await this.repo.hasGuide(block.taskId)) ? 0 : block.minutes / 60;
             await this.repo.setBlockDone(block.id, block.taskId, done, hours);
+            if (hours) await this.activity.log(userId, (done ? 1 : -1) * block.minutes * 60); // cuenta para la racha
             await this.priority.recompute(userId); // menos horas pendientes = otra prioridad
         }
         return { ok: true };
