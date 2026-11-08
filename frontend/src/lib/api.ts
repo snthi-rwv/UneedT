@@ -16,10 +16,11 @@ export class ApiError extends Error {
 const NO_REFRESH = ['/auth/login', '/auth/register', '/auth/refresh', '/auth/logout'];
 
 async function raw(path: string, method: string, body?: unknown, withAuth = true) {
+    const isForm = body instanceof FormData; // con archivo: el navegador arma el multipart y su Content-Type
     const res = await fetch(BASE + path, {
         method,
-        headers: { 'Content-Type': 'application/json', ...(withAuth && tokens.access ? { Authorization: `Bearer ${tokens.access}` } : {}) },
-        body: body ? JSON.stringify(body) : undefined,
+        headers: { ...(isForm ? {} : { 'Content-Type': 'application/json' }), ...(withAuth && tokens.access ? { Authorization: `Bearer ${tokens.access}` } : {}) },
+        body: isForm ? body : body ? JSON.stringify(body) : undefined,
     });
     const text = await res.text();
     return { res, data: text ? JSON.parse(text) : null };

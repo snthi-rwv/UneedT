@@ -35,6 +35,13 @@ enum AccountStatus {
   REVOKED
 }
 
+// Intensidad del plan de estudio: define la duración de los bloques y de los descansos
+enum PlanIntensity {
+  LIGHT // bloques de 25 min, descansos de 5
+  NORMAL // bloques de 45 min, descansos de 10
+  INTENSE // bloques de 60 min, descansos de 10
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -42,6 +49,8 @@ model User {
   passwordHash String? // null si el usuario solo entra con Google
   googleId     String?  @unique
   createdAt    DateTime @default(now())
+
+  aiPrioritizedAt DateTime? // última repriorización automática con IA (como máximo una cada 6 horas)
 
   subjects      Subject[]
   tasks         Task[]
@@ -52,6 +61,7 @@ model User {
   processed     ProcessedEmail[]
   plans         StudyPlan[]
   surveys       Survey[]
+  guides        TaskGuide[]
 }
 
 // Refresh tokens de UneedT. Se guarda solo el hash (SHA-256), nunca el token.
@@ -98,6 +108,8 @@ model Task {
   source         TaskSource @default(MANUAL)
   priorityScore  Float      @default(0)
   priorityReason String     @default("")
+  aiAdjustment   Float      @default(0) // ajuste de la IA (-10 a 10) que se suma al puntaje de la fórmula
+  aiReason       String? // motivo que dio la IA; mientras exista, reemplaza al de la fórmula
   critical       Boolean    @default(false)
   completedAt    DateTime?
   createdAt      DateTime   @default(now())
@@ -106,6 +118,7 @@ model Task {
   user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   subject Subject?     @relation(fields: [subjectId], references: [id], onDelete: SetNull)
   blocks  StudyBlock[]
+  guide   TaskGuide?
 
   @@index([userId, status, priorityScore])
   @@index([userId, dueDate])
@@ -176,11 +189,14 @@ model TaskProposal {
 }
 
 model StudyPlan {
-  id             String   @id @default(cuid())
+  id             String        @id @default(cuid())
   userId         String
   date           String // AAAA-MM-DD
   availableHours Float
-  createdAt      DateTime @default(now())
+  startTime      String        @default("08:00") // HH:mm
+  endTime        String        @default("") // HH:mm en que termina el plan (con descansos); sirve para replantearlo
+  intensity      PlanIntensity @default(NORMAL)
+  createdAt      DateTime      @default(now())
 
   user   User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   blocks StudyBlock[]
@@ -213,4 +229,43 @@ model Survey {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
+}
+
+// Plan específico de una tarea: el contexto que dio el estudiante y el paso a paso de la IA
+model TaskGuide {
+  id         String   @id @default(cuid())
+  taskId     String   @unique
+  userId     String
+  context    String   @default("") // lo que escribió el estudiante (temas, qué le piden...)
+  sourceName String? // nombre del archivo adjunto (rúbrica, correo del profesor...)
+  sourceText String? // texto extraído del archivo, recortado. El archivo en sí no se guarda.
+  summary    String   @default("") // qué se pide, en una frase (lo escribe la IA)
+  usedAi     Boolean  @default(false) // false = pasos genéricos (plan B sin IA)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  task  Task        @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user  User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  steps GuideStep[]
+
+  @@index([userId])
+}
+
+// Subtarea del plan específico, con su cronómetro
+model GuideStep {
+  id              String    @id @default(cuid())
+  guideId         String
+  order           Int
+  title           String
+  detail          String    @default("")
+  minutes         Int // tiempo estimado
+  done            Boolean   @default(false)
+  doneAt          DateTime?
+  spentSeconds    Int       @default(0) // tiempo medido con el cronómetro (tramos ya cerrados)
+  runningSince    DateTime? // si el cronómetro está corriendo, desde cuándo
+  creditedSeconds Int       @default(0) // lo que este paso ya sumó a las horas dedicadas de la tarea
+
+  guide TaskGuide @relation(fields: [guideId], references: [id], onDelete: Cascade)
+
+  @@index([guideId, order])
 }

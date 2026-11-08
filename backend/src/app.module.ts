@@ -17,12 +17,16 @@ import { EmailSyncModule } from './modules/email-sync/email-sync.module';
 import { SurveysModule } from './modules/surveys/surveys.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { HealthModule } from './modules/health/health.module';
+import { GuidesModule } from './modules/guides/guides.module';
 
 @Module({
     imports: [
         ConfigModule.forRoot({ isGlobal: true, load: [configuration], validate: validateEnv }),
         ScheduleModule.forRoot(), // necesario para el cron de sincronización
-        ThrottlerModule.forRoot([{ ttl: 60_000, limit: 120 }]), // límite general por IP
+        ThrottlerModule.forRoot({
+            throttlers: [{ ttl: 60_000, limit: 120 }], // límite general por IP
+            errorMessage: 'Hiciste demasiadas solicitudes seguidas. Espera un minuto e inténtalo de nuevo.',
+        }),
         DatabaseModule,
         CommonModule,
         AuthModule,
@@ -34,6 +38,7 @@ import { HealthModule } from './modules/health/health.module';
         EmailSyncModule,
         SurveysModule,
         AnalyticsModule,
+        GuidesModule,
         HealthModule,
     ],
     providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],

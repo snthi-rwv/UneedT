@@ -1,6 +1,6 @@
 import { FormEvent, useState } from 'react';
 import { useAuth } from '../lib/auth';
-import { Err } from '../components/ui';
+import { Err, FullscreenToggle, ThemeToggle } from '../components/ui';
 
 export default function AuthPage() {
     const { login, register, error: sessionError } = useAuth();
@@ -25,6 +25,10 @@ export default function AuthPage() {
 
     return (
         <div className="auth">
+            <div className="floating-tools">
+                <ThemeToggle />
+                <FullscreenToggle />
+            </div>
             <section className="auth-pitch">
                 <h1>Abre UneedT y ya sabes <mark>por dónde empezar</mark>.</h1>
                 <p>Tus tareas llegan desde el correo institucional, la IA pesa cada una según la nota, la dificultad y la fecha, y te arma el plan del día.</p>

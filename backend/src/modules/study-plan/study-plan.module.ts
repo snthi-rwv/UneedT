@@ -9,5 +9,6 @@ import { StudyPlanService } from './study-plan.service';
     imports: [PriorityModule, AiModule],
     controllers: [StudyPlanController],
     providers: [StudyPlanRepository, StudyPlanService],
+    exports: [StudyPlanService],
 })
 export class StudyPlanModule {}

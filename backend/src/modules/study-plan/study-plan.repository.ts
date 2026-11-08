@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
+import { PlanIntensity } from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
+
+export interface NewBlock { taskId: string; order: number; startTime: string; minutes: number; note: string }
+export interface PlanMeta { availableHours: number; startTime: string; endTime: string; intensity: PlanIntensity }
 
 // Capa de datos del plan de estudio.
 @Injectable()
@@ -23,16 +27,25 @@ export class StudyPlanRepository {
     }
 
     // Un solo plan por día: si ya existía, se reemplaza
-    async replacePlan(
-        userId: string, date: string, availableHours: number,
-        blocks: { taskId: string; order: number; startTime: string; minutes: number; note: string }[],
-    ) {
+    async replacePlan(userId: string, date: string, meta: PlanMeta, blocks: NewBlock[]) {
         await this.prisma.studyPlan.deleteMany({ where: { userId, date } });
-        return this.prisma.studyPlan.create({ data: { userId, date, availableHours, blocks: { create: blocks } } });
+        return this.prisma.studyPlan.create({ data: { userId, date, ...meta, blocks: { create: blocks } } });
+    }
+
+    // Replanteo: los bloques ya hechos se conservan; los pendientes se reemplazan
+    replaceUndoneBlocks(planId: string, blocks: NewBlock[]) {
+        return this.prisma.$transaction([
+            this.prisma.studyBlock.deleteMany({ where: { planId, done: false } }),
+            this.prisma.studyBlock.createMany({ data: blocks.map((b) => ({ ...b, planId })) }),
+        ]);
     }
 
     findBlock(userId: string, blockId: string) {
         return this.prisma.studyBlock.findFirst({ where: { id: blockId, plan: { userId } } });
+    }
+
+    async hasGuide(taskId: string) {
+        return (await this.prisma.taskGuide.count({ where: { taskId } })) > 0;
     }
 
     // Marca el bloque y suma/resta las horas estudiadas en la tarea (todo o nada)

@@ -19,11 +19,11 @@ export class TasksRepository {
     update(id: string, data: Prisma.TaskUncheckedUpdateInput) { return this.prisma.task.update({ where: { id }, data }); }
     delete(id: string) { return this.prisma.task.delete({ where: { id } }); }
 
-    // Datos de la pantalla "Hoy"
+    // Datos de la página principal (incluye si la tarea ya tiene plan específico)
     topOpen(userId: string, take: number) {
         return this.prisma.task.findMany({
             where: { userId, status: { not: 'DONE' } },
-            include: { subject: true },
+            include: { subject: true, guide: { select: { id: true } } },
             orderBy: [{ priorityScore: 'desc' }, { dueDate: 'asc' }],
             take,
         });

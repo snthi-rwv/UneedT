@@ -2,7 +2,17 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <script>
+        // Aplica el tema (guardado o del sistema) antes de pintar, para evitar el parpadeo
+        (function () {
+            var t = null;
+            try { t = localStorage.getItem('uneedt-theme'); } catch (e) {}
+            if (t !== 'light' && t !== 'dark') t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            document.documentElement.dataset.theme = t;
+        })();
+    </script>
     <title>UneedT: sabe por dónde empezar</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

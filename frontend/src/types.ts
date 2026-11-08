@@ -6,12 +6,24 @@ export interface Task {
     id: string; title: string; description: string | null; subjectId: string | null; subject: Subject | null; dueDate: string;
     weightPct: number; complexity: number; estimatedHours: number; hoursSpent: number; status: TaskStatus; source: 'MANUAL' | 'EMAIL';
     priorityScore: number; priorityReason: string; critical: boolean;
+    guide?: { id: string } | null; // en la página principal: si ya tiene plan específico
 }
 
 export interface Focus { top: Task | null; next: Task[]; overdue: number; dueSoon: number; openCount: number }
 
-export interface Block { id: string; startTime: string; minutes: number; note: string; done: boolean; task: Task }
-export interface Plan { id: string; date: string; availableHours: number; blocks: Block[] }
+export type Intensity = 'LIGHT' | 'NORMAL' | 'INTENSE';
+export interface Block { id: string; taskId: string; startTime: string; minutes: number; note: string; done: boolean; task: Task }
+export interface Plan { id: string; date: string; availableHours: number; startTime: string; endTime: string; intensity: Intensity; blocks: Block[] }
+
+// Plan específico de una tarea (paso a paso) y sus subtareas con cronómetro
+export interface GuideStep {
+    id: string; order: number; title: string; detail: string; minutes: number; done: boolean; doneAt: string | null;
+    spentSeconds: number; runningSince: string | null; creditedSeconds: number;
+}
+export interface Guide { id: string; context: string; sourceName: string | null; summary: string; usedAi: boolean; updatedAt: string; steps: GuideStep[] }
+export interface TaskWithGuide extends Omit<Task, 'guide'> { guide: Guide | null }
+export interface GuideList { now: string; tasks: TaskWithGuide[] }
+export interface GuideResult { now: string; task: TaskWithGuide; usedAi?: boolean; replanned?: boolean }
 
 export interface Proposal {
     id: string; fromAddress: string; emailSubject: string; subjectHint: string | null; title: string; description: string | null;

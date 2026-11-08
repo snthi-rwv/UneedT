@@ -15,6 +15,7 @@ export class TasksController {
     }
     @Get('focus') focus(@CurrentUser() u: AuthUser) { return this.svc.focus(u.id); }
     @Post('prioritize') prioritize(@CurrentUser() u: AuthUser) { return this.svc.prioritizeWithAi(u.id); }
+    @Post('prioritize/auto') autoPrioritize(@CurrentUser() u: AuthUser) { return this.svc.autoPrioritize(u.id); }
     @Post() create(@CurrentUser() u: AuthUser, @Body() dto: CreateTaskDto) { return this.svc.create(u.id, dto); }
     @Patch(':id') update(@CurrentUser() u: AuthUser, @Param('id') id: string, @Body() dto: UpdateTaskDto) { return this.svc.update(u.id, id, dto); }
     @Delete(':id') remove(@CurrentUser() u: AuthUser, @Param('id') id: string) { return this.svc.remove(u.id, id); }
