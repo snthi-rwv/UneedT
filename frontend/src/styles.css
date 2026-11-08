@@ -79,6 +79,11 @@ small { display: block; color: var(--slate); }
 .btn.primary { background: var(--ink); color: #fff; border-color: var(--ink); }
 [data-theme="dark"] .btn.primary { background: var(--hl); color: #14213d; border-color: var(--hl); }
 .btn.google { text-align: center; }
+/* Botón "Repriorizar con IA": solo el borde en amarillo */
+.btn.ai-btn { border: 2px solid #f2c230; padding: calc(.6rem - 1px) calc(1rem - 1px); }
+.btn.ai-btn:hover { border-color: #d4a400; }
+[data-theme="dark"] .btn.ai-btn { border-color: var(--hl); }
+[data-theme="dark"] .btn.ai-btn:hover { border-color: #fff09a; }
 .link { background: none; border: 0; padding: 0; font: inherit; color: var(--blue); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 .link.danger { color: var(--brick); }
 label { display: flex; flex-direction: column; gap: .3rem; font-size: .9rem; font-weight: 500; }

@@ -65,7 +65,7 @@ export default function Today() {
     return (
         <>
             <PageHead title={`Hola, ${user?.name?.split(' ')[0] ?? ''}`}>
-                <button className="btn" onClick={prioritize} disabled={!!busy || !data?.openCount}>
+                <button className="btn ai-btn" onClick={prioritize} disabled={!!busy || !data?.openCount}>
                     {busy === 'ai' ? 'Pensando…' : 'Repriorizar con IA'}
                 </button>
             </PageHead>
