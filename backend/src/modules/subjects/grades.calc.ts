@@ -37,7 +37,8 @@ const needed = (goal: number, accumulated: number, remainingPct: number) =>
  *   necesaria = (meta − acumulado) / (porcentaje que falta / 100)
  */
 export function gradeSummary(entries: GradeInput[], target = PASS_GRADE): GradeSummary {
-    const evaluatedPct = Math.min(entries.reduce((n, e) => n + e.percent, 0), 100);
+    // Se redondea la suma: 33.3 + 33.4 + 33.3 da 99.99999999999999 y dejaría un "por evaluar" que no existe
+    const evaluatedPct = Math.min(Math.round(entries.reduce((n, e) => n + e.percent, 0) * 1e6) / 1e6, 100);
     const remainingPct = Math.max(100 - evaluatedPct, 0);
     const accumulated = entries.reduce((n, e) => n + (e.grade * e.percent) / 100, 0);
     const average = evaluatedPct > 0 ? (accumulated * 100) / evaluatedPct : null;

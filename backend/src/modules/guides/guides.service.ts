@@ -149,7 +149,7 @@ export class GuidesService {
                 if (!step.done) break;
                 await this.repo.updateStep(step.id, { done: false, doneAt: null, creditedSeconds: 0 });
                 await this.repo.addTaskHours(taskId, -step.creditedSeconds / 3600);
-                if (step.spentSeconds === 0) await this.activity.log(userId, -step.creditedSeconds); // era tiempo estimado, no medido
+                if (step.spentSeconds === 0) await this.activity.log(userId, -step.creditedSeconds, step.doneAt ?? now); // era tiempo estimado: se descuenta del día en que se sumó
                 hoursChanged = true;
                 break;
 
@@ -159,7 +159,7 @@ export class GuidesService {
                 // Lo que ya estaba en el registro del día: lo medido, o lo estimado si se marcó sin cronómetro
                 const logged = step.spentSeconds > 0 ? step.spentSeconds : step.done ? step.creditedSeconds : 0;
                 const effective = step.done && spent === 0 ? step.minutes * 60 : spent;
-                await this.activity.log(userId, effective - logged);
+                await this.activity.log(userId, effective - logged, step.doneAt ?? now); // la corrección va al día en que se terminó el paso
                 if (step.done) {
                     const credit = spent > 0 ? spent : step.minutes * 60;
                     await this.repo.updateStep(step.id, { spentSeconds: spent, runningSince: null, creditedSeconds: credit });

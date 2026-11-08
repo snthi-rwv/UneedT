@@ -50,8 +50,10 @@ export class SubjectsService {
         const entries = dto.entries.map((e) => ({ label: (e.label ?? '').trim().slice(0, 60), percent: e.percent, grade: e.grade }));
         const target = dto.targetGrade ?? subject.targetGrade;
         const summary = gradeSummary(entries, target);
-        // La nota actual de la materia pasa a ser el promedio de lo evaluado (la usa la prioridad y la IA)
-        await this.repo.saveGrades(id, entries, { targetGrade: target, currentGrade: summary.average });
+        // La nota actual de la materia pasa a ser el promedio de lo evaluado (la usa la prioridad y la IA).
+        // Sin filas no hay promedio: la nota manual se conserva, y solo se limpia si venía de notas que se quitaron.
+        const currentGrade = entries.length ? { currentGrade: summary.average } : (await this.repo.countGrades(id)) ? { currentGrade: null } : {};
+        await this.repo.saveGrades(id, entries, { targetGrade: target, ...currentGrade });
         await this.priority.recompute(userId);
         return this.getGrades(userId, id);
     }
