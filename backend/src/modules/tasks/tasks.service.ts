@@ -28,6 +28,12 @@ export class TasksService {
         return { top: open[0] ?? null, next: open.slice(1), overdue, dueSoon, openCount };
     }
 
+    // Fichas del panel izquierdo: tareas vencidas sin entregar y tareas abiertas (consulta liviana)
+    async counts(userId: string) {
+        const [overdue, open] = await Promise.all([this.repo.countOpen(userId, { lt: new Date() }), this.repo.countOpen(userId)]);
+        return { overdue, open };
+    }
+
     async create(userId: string, dto: CreateTaskDto) {
         if (dto.subjectId) await this.mustOwnSubject(userId, dto.subjectId);
         const task = await this.repo.create({ ...dto, userId });
@@ -46,6 +52,11 @@ export class TasksService {
         if (dto.subjectId) await this.mustOwnSubject(userId, dto.subjectId);
         const data: Prisma.TaskUncheckedUpdateInput = { ...dto };
         if (dto.status) data.completedAt = dto.status === 'DONE' ? new Date() : null; // fecha real de entrega
+        // Si cambian los datos que usa la prioridad, el ajuste anterior de la IA ya no aplica
+        if (['dueDate', 'weightPct', 'complexity', 'estimatedHours', 'subjectId'].some((k) => k in dto)) {
+            data.aiAdjustment = 0;
+            data.aiReason = null;
+        }
         await this.repo.update(id, data);
         await this.priority.recompute(userId);
         return this.get(userId, id);
@@ -58,6 +69,7 @@ export class TasksService {
     }
 
     prioritizeWithAi(userId: string) { return this.priority.refineWithAi(userId); }
+    autoPrioritize(userId: string) { return this.priority.autoRefine(userId); } // al entrar: máximo una vez cada 6 h
 
     private async mustOwnSubject(userId: string, subjectId: string) {
         if (!(await this.subjects.findOwned(userId, subjectId))) throw new BadRequestException('La materia no existe');

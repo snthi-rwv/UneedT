@@ -8,6 +8,9 @@ export const tokens = {
     clear() { localStorage.removeItem('uneedt_access'); localStorage.removeItem('uneedt_refresh'); },
 };
 
+// Se lanza después de cualquier cambio exitoso (crear, editar, terminar…): el panel refresca racha y contadores
+export const DATA_CHANGED = 'uneedt:changed';
+
 export class ApiError extends Error {
     constructor(message: string, public status: number) { super(message); }
 }
@@ -16,10 +19,11 @@ export class ApiError extends Error {
 const NO_REFRESH = ['/auth/login', '/auth/register', '/auth/refresh', '/auth/logout'];
 
 async function raw(path: string, method: string, body?: unknown, withAuth = true) {
+    const isForm = body instanceof FormData; // con archivo: el navegador arma el multipart y su Content-Type
     const res = await fetch(BASE + path, {
         method,
-        headers: { 'Content-Type': 'application/json', ...(withAuth && tokens.access ? { Authorization: `Bearer ${tokens.access}` } : {}) },
-        body: body ? JSON.stringify(body) : undefined,
+        headers: { ...(isForm ? {} : { 'Content-Type': 'application/json' }), ...(withAuth && tokens.access ? { Authorization: `Bearer ${tokens.access}` } : {}) },
+        body: isForm ? body : body ? JSON.stringify(body) : undefined,
     });
     const text = await res.text();
     return { res, data: text ? JSON.parse(text) : null };
@@ -55,5 +59,6 @@ export async function api<T>(path: string, opts: { method?: string; body?: unkno
         const m = data?.message;
         throw new ApiError(Array.isArray(m) ? m.join('. ') : m || 'Algo salió mal. Inténtalo de nuevo.', res.status);
     }
+    if (method !== 'GET' && !path.startsWith('/auth/')) window.dispatchEvent(new Event(DATA_CHANGED));
     return data as T;
 }
